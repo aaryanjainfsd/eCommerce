@@ -1,6 +1,6 @@
 // Import Librarys
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { NavLink, useParams } from "react-router-dom";
 import instance from "../routes/axiosConfig";
 import { useCart } from "../contexts/CartProvider";
 import "../../assets/css/productDetail.css";
@@ -18,7 +18,6 @@ export default function ProductDetails() {
     useEffect(() => {getProductData(id);}, [id]);
 	useEffect(() => {
         if (!product) return;
-        localStorage.setItem("storedCart", JSON.stringify(cart));
         const existing = cart.find((item) => item.id === product._id);
 		if (existing) {
 			setIsInCart(true);
@@ -48,23 +47,87 @@ export default function ProductDetails() {
         }
     }
 
-	function handleAddToCart(idToAdd) 
+	function handleAddToCart(idToAdd, getQuantity = 1) 
     {
-        const checkItem = cart.find((item) => item.id === idToAdd);
-        if (checkItem) 
+        const exist = cart.find((item) => item.id === idToAdd);
+        if (exist) 
         {
-            alert("Item is already in the cart.");
+            setCart((items) =>
+                        items.map((item) =>
+                            item.id === idToAdd
+                            ? {...item, quantity: item.quantity + getQuantity} : item
+                        )
+                    );
+        }
+        else
+        {
+            setCart([...cart,{ id: idToAdd, quantity: getQuantity }]);
+        }
+
+        setIsInCart(true);
+	}
+
+    function handleIncrease()
+    {
+        if (!product)
+        {
             return;
         }
-        // console.log("Adding to cart:", idToAdd);
-		setCart([...cart,{ id: idToAdd, quantity: 1 }]);
+        else
+        {
+            const existing = cart.find(items => items.id === product._id)
+            if(!existing)
+            {
+                handleAddToCart(product._id, quantity + 1);
+            }
+            else
+            {
+                setCart((items) => 
+                    items.map((item) => 
+                        item.id === product._id 
+                        ? {...item, quantity: item.quantity +1} 
+                        : item
+                    )
+                );
+            }
+        }
+    }
+
+    function handleDecrease()
+    {
+        if (!product)
+        {
+            return;
+        }
+        else
+        {
+            const existing = cart.find(items => items.id === product._id)
+            if(!existing)
+            {
+                setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
+            }
+            else
+            {
+                setCart((items) => 
+                    items
+                    .map((item) => 
+                        item.id === product._id 
+                        ? {...item, quantity: item.quantity - 1} 
+                        : item
+                    ).filter((item) => item.quantity > 0)
+                );
+            }
+        }
+    }
+
+    function handleRemoveFromCart(idToRemove) {
+		setCart((items) => items.filter((item) => item.id !== idToRemove));
+		setIsInCart(false);
+		setQuantity(1);
 	}
     
     if (loading)  return <p className="loading-text">Loading product details...</p>;
     if (!product) return <p className="error-text">Product not found.</p>;
-    
-    // console.log("Current cart:", cart);
-    // console.log(product);
 
     return (
         <div className="product-detail-page">
@@ -88,18 +151,26 @@ export default function ProductDetails() {
                     <div className="quantity-container">
                         <p className="quantity-label">Quantity</p>
                         <div className="quantity-controls">
-                            <button className="qty-btn">−</button>
-                            <span className="qty-value">1</span>
-                            <button className="qty-btn">+</button>
+                            <button className="qty-btn" onClick={handleDecrease}>−</button>
+                            <span className="qty-value">{quantity}</span>
+                            <button className="qty-btn" onClick={handleIncrease}> +</button>
                         </div>
                     </div>
 
                     {/* Action buttons */}
                     <div className="product-action-buttons">
-                        <button onClick={() => handleAddToCart(product._id)} className="btn-add-cart" disabled={isInCart} >
-							{isInCart ? "Added" : "Add to Cart"}
-						</button>
-                        <button className="btn-buy-now">⚡ Buy Now</button>
+                        	{
+                                !isInCart ? 
+                                (
+                                    <button onClick={() => handleAddToCart(product._id, quantity)} className="btn-add-cart" > Add to Cart </button>
+                                ): 
+                                (
+                                    <button onClick={() => handleRemoveFromCart(product._id)} className="btn-remove-cart" > 🗑️ Remove from Cart </button>
+                                )
+                            }  
+                         <NavLink to="/cart" >
+                            <button className="btn-buy-now">⚡ Go to Cart</button>
+                        </NavLink>
                     </div>
                 </div>
             </div>

@@ -220,3 +220,16 @@
 		font-size: 0.9rem;
 	}
 }
+.btn-remove-cart {
+	background-color: #ff4d4d;
+	color: white;
+	border: none;
+	padding: 10px 20px;
+	border-radius: 8px;
+	cursor: pointer;
+	transition: all 0.3s ease;
+}
+
+.btn-remove-cart:hover {
+	background-color: #d63031;
+}
