@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useCart } from "../contexts/CartProvider";
 import instance from "../routes/axiosConfig";
 import { NavLink, useNavigate } from "react-router-dom";
-import "../../assets/css/Cart.css";
+import "../../assets/css/cart.css";
 
 function Cart() {
 	const { cart, setCart } = useCart();

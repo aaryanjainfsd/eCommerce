@@ -2,7 +2,7 @@ import { useState } from "react";
 import instance from "../routes/axiosConfig";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthProvider";
-import "../../assets/css/Login.css";
+import "../../assets/css/login.css";
 
 function Login() {
     const [data, setData] = useState({

@@ -2,7 +2,7 @@ import { useState } from "react";
 import instance from "../routes/axiosConfig";
 import { Link, useNavigate } from "react-router-dom";
 
-import "../../assets/css/Register.css";
+import "../../assets/css/register.css";
 
 function Register() {
     const [data, setData] = useState({
