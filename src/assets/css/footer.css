@@ -1,0 +1,164 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap");
+
+.footer {
+  background: #0d0d0d;
+  color: #e8e3d4;
+  padding: 2.5rem 2rem 1rem;
+  font-family: "Poppins", sans-serif;
+  line-height: 1.6;
+}
+
+.footer-top-text {
+  text-align: right;
+  font-size: 0.9rem;
+  color: #d6c9a1;
+  margin-bottom: 0.8rem;
+}
+
+.footer-top-text .brand {
+  color: #e3b23c;
+  font-weight: 500;
+}
+
+.divider {
+  border: none;
+  border-top: 1px solid #2d2d2d;
+  margin: 1rem 0;
+}
+
+/* === Footer Main Content === */
+.footer-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 2rem;
+  margin-top: 1.5rem;
+}
+
+.footer-section h2.footer-logo {
+  font-family: "Playfair Display", serif;
+  font-size: 1.6rem;
+  color: #e3b23c;
+  margin-bottom: 0.25rem;
+}
+
+.footer-section .footer-subtext {
+  color: #aaa;
+  font-size: 0.8rem;
+  margin-bottom: 1rem;
+}
+
+.footer-section h4 {
+  color: #f0e9d2;
+  margin: 1rem 0 0.4rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.footer-section p,
+.footer-section li,
+.footer-section a {
+  color: #ccc;
+  font-size: 0.88rem;
+  text-decoration: none;
+}
+
+.footer-section ul {
+  list-style: none;
+  padding: 0;
+}
+
+.footer-section li {
+  margin-bottom: 0.3rem;
+}
+
+.social-icons {
+  display: flex;
+  gap: 0.8rem;
+  margin-top: 0.5rem;
+}
+
+.social-icons a {
+  color: #e3b23c;
+  transition: 0.3s;
+}
+
+.social-icons a:hover {
+  color: #fff;
+}
+
+/* Map */
+.footer-map iframe {
+  width: 100%;
+  height: 160px;
+  border: none;
+  border-radius: 4px;
+}
+
+/* === Bottom Section === */
+.footer-bottom {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1rem;
+  font-size: 0.85rem;
+  color: #cfcfcf;
+}
+
+.footer-bottom p {
+  margin: 0;
+}
+
+.footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+
+.footer-links a {
+  color: #cfcfcf;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.footer-links a:hover {
+  color: #e3b23c;
+}
+
+.highlight {
+  color: #e3b23c;
+  font-weight: 500;
+}
+
+/* WhatsApp Button */
+.footer-whatsapp {
+  background: #1db954;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 25px;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.85rem;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  transition: background 0.3s ease, transform 0.3s ease;
+}
+
+.footer-whatsapp:hover {
+  background: #17a147;
+  transform: translateY(-2px);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .footer-top-text {
+    text-align: center;
+  }
+  .footer-bottom {
+    flex-direction: column;
+    text-align: center;
+  }
+  .footer-links {
+    justify-content: center;
+  }
+}
