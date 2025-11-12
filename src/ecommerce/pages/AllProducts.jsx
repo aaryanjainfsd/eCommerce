@@ -1,7 +1,7 @@
 import axios from "axios";
 import { useState, useEffect } from "react";
 import instance from "../routes/axiosConfig";
-import styles from "../../assets/css/AllProducts.module.css"; // ✅ scoped styles
+import styles from "../../assets/css/allProducts.module.css"; // ✅ scoped styles
 
 function First() {
 	const [products, setProducts] = useState([]);
