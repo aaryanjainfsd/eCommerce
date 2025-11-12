@@ -26,7 +26,7 @@ function Login() {
             const response = await instance.post("/auth/login", data, {
                 withCredentials: true,
             });
-            
+                
             if (response.status === 200) {
                 localStorage.setItem("userData", JSON.stringify(response.data.user));
                 await checkUserLoggedIn(response);
