@@ -1,21 +1,36 @@
-import { useState } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
-import { useCart } from "../contexts/CartProvider";
-import { useAuth } from "../contexts/AuthProvider";
-import { Heart, ShoppingBag, User, Menu, X } from "lucide-react";
+import { useEffect, useState } from "react";
 import "../../assets/css/header.css";
+import { useAuth } from "../contexts/AuthProvider";
+import { useCart } from "../contexts/CartProvider";
+// import { useCurrency } from "../contexts/CurrencyProvider";
+import { NavLink, useNavigate } from "react-router-dom";
+import { Heart, ShoppingBag, User, Menu, X } from "lucide-react";
+
+import { fetchRates } from "../thirdPartyAPIs/currencyAPI";
+
 
 export default function Header() {
+
+    useEffect(() => {
+	async function testAPI() {
+		const data = await fetchRates();
+		console.log("💱 Exchange Rate API Response:", data);
+	}
+	testAPI();
+}, []);
+
 	const { cart } = useCart();
 	const { loggedInStatus, logout, userData } = useAuth();
 	const navigate = useNavigate();
 	const [dropdownOpen, setDropdownOpen] = useState(false);
 	const [menuOpen, setMenuOpen] = useState(false);
+	const { currency, setCurrency } = useState("INR"); // ✅ new state
 
-	const name = userData?.name
-		? userData.name.split(" ")[0].charAt(0).toUpperCase() +
-		  userData.name.split(" ")[0].slice(1)
-		: "User";
+	const name = userData?.name ? userData.name.split(" ")[0].charAt(0).toUpperCase() + userData.name.split(" ")[0].slice(1) : "User";
+
+	const handleCurrencyChange = (e) => {
+        setCurrency(e.target.value);
+    };
 
 	return (
 		<header className="shopy-header">
@@ -35,6 +50,15 @@ export default function Header() {
 
 				{/* Right Icons */}
 				<div className="shopy-icons">
+					{/* ✅ Currency Dropdown */}
+					<div className="currency-selector">
+						<select value={currency} onChange={handleCurrencyChange}>
+							<option value="INR">INR ₹</option>
+							<option value="USD">USD $</option>
+							<option value="EUR">EUR €</option>
+						</select>
+					</div>
+
 					<NavLink title="Wishlist" to="/wishlist">
 						<Heart size={20} />
 					</NavLink>

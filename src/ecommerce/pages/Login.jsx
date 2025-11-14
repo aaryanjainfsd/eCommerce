@@ -22,16 +22,16 @@ function Login() {
     async function handleSubmit(e) {
         e.preventDefault();
         try {
-            setIsSubmitting(true);
             const response = await instance.post("/auth/login", data, {
                 withCredentials: true,
             });
-                
+            
             if (response.status === 200) {
                 localStorage.setItem("userData", JSON.stringify(response.data.user));
-                await checkUserLoggedIn(response);
+                const result = await checkUserLoggedIn(response);
                 navigate("/");
             }
+            setIsSubmitting(true);
         } catch (error) {
             console.log(error);
             setIsError(error.message);

@@ -14,7 +14,7 @@ function AuthProvider({ children }) {
             setUserData(JSON.parse(storedUser));
         }
         checkUserLoggedIn();
-    }, []);
+    },[]);
 
     async function checkUserLoggedIn() {
         try 
