@@ -176,7 +176,7 @@ export default function DiceGame() {
                                     {rolls.map((roll) => 
                                     (
                                         <li key={roll.chanceNumber} className="dice-history__item" >
-                                            <strong>Chance {roll.chanceNumber} --> </strong> Got {roll.gotInDice},
+                                            <strong>Chance {roll.chanceNumber} -- </strong> Got {roll.gotInDice},
 
                                             {(roll.blocked === true)? 
                                                                         ( <> stayed at {roll.position} — {" "} <span>{roll.note}</span> </>) 
