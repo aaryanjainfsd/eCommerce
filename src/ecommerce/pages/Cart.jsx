@@ -3,12 +3,15 @@ import { useCart } from "../contexts/CartProvider";
 import instance from "../routes/axiosConfig";
 import { NavLink } from "react-router-dom";
 import "../../assets/css/cart.css";
+import { useCurrency } from "../contexts/CurrencyProvider";
+
 
 function Cart() {
     const { cart, setCart } = useCart();
     const [cartItems, setCartItems] = useState([]);
     const [loading, setLoading] = useState(false);
     const hasLoadedOnce = useRef(false);
+    const { convert, currency } = useCurrency();
 
     useEffect(() => {
         if (cart.length > 0) getCartProducts();
@@ -54,7 +57,7 @@ function Cart() {
     }
 
     const totalAmount = cartItems.reduce(
-        (sum, item) => sum + (item.price || 0) * (item.quantity || 1),
+        (sum, item) => sum + (convert(item.price).toFixed(2) || 0) * (item.quantity || 1),
         0
     );
 
@@ -106,7 +109,7 @@ function Cart() {
                             <div className="prod-details">
                                 <h3 className="prod-title">{item.name}</h3>
                                 <p className="prod-meta">
-                                    Price: ₹{item.price}
+                                    Price: {currency} {convert(item.price).toFixed(2)}
                                 </p>
                                 <p className="prod-meta">In Stock</p>
 
@@ -120,7 +123,7 @@ function Cart() {
                             </div>
                         </div>
 
-                        <div className="each-price">₹{item.price}</div>
+                        <div className="each-price">{currency} {convert(item.price).toFixed(2)}</div>
 
                         <div className="qty-select-box">
                             <select
@@ -141,8 +144,8 @@ function Cart() {
                         </div>
 
                         <div className="total-price">
-                            ₹
-                            {(item.price * item.quantity).toLocaleString(
+                            {currency} 
+                            {(convert(item.price).toFixed(2) * item.quantity).toLocaleString(
                                 "en-IN"
                             )}
                         </div>
@@ -181,7 +184,7 @@ function Cart() {
 
                     <div className="summary-row total-row">
                         <span>Estimated Total</span>
-                        <span>₹{totalAmount.toLocaleString("en-IN")}</span>
+                        <span>{currency} {totalAmount.toLocaleString("en-IN")}</span>
                     </div>
 
                     <button className="checkout-button">Checkout</button>

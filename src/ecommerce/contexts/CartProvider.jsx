@@ -3,7 +3,8 @@ import { createContext, useContext, useEffect, useState } from "react";
 const cartContext = createContext();
 
 function CartProvider({ children }) {
-	const [cart, setCart] = useState(() => {
+	const [cart, setCart] = useState(() => 
+    {
 		try {
 			const stored = localStorage.getItem("storedCart");
 			return stored ? JSON.parse(stored) : [];
@@ -14,7 +15,8 @@ function CartProvider({ children }) {
 	});
 
 	// ✅ Save cart to localStorage whenever it changes
-	useEffect(() => {
+	useEffect(() => 
+    {
 		try {
 			localStorage.setItem("storedCart", JSON.stringify(cart));
 		} catch (error) {
