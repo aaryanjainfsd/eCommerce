@@ -1,0 +1,299 @@
+/* Page wrapper */
+.dice-game {
+	min-height: 100vh;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	background: radial-gradient(circle at top, #1f2937, #020617);
+	padding: 20px;
+	font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+	color: #e5e7eb;
+}
+
+/* Card */
+.dice-game__card {
+	width: 100%;
+	max-width: 1100px;
+	background: rgba(15, 23, 42, 0.95);
+	border-radius: 24px;
+	box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+	padding: 24px 24px 28px;
+	border: 1px solid rgba(148, 163, 184, 0.35);
+}
+
+/* Header */
+.dice-game__header {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	margin-bottom: 20px;
+}
+
+.dice-game__title {
+	font-size: 24px;
+	font-weight: 700;
+	color: #f9fafb;
+}
+
+.dice-game__subtitle {
+	font-size: 14px;
+	color: #9ca3af;
+}
+
+/* Layout: board + dice panel */
+.dice-game__content {
+	display: grid;
+	grid-template-columns: 3fr 2fr;
+	gap: 20px;
+}
+
+/* Board */
+.board {
+	background: rgba(15, 23, 42, 0.8);
+	border-radius: 18px;
+	padding: 16px;
+	border: 1px solid rgba(55, 65, 81, 0.8);
+	display: flex;
+	flex-direction: column;
+}
+
+.board__header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 10px;
+	font-size: 14px;
+	color: #e5e7eb;
+}
+
+.board__hint {
+	font-size: 12px;
+	color: #9ca3af;
+}
+
+/* 10 x 10 grid */
+.board__grid {
+	display: grid;
+	grid-template-columns: repeat(10, 1fr);
+	gap: 6px;
+}
+
+.board__cell {
+	aspect-ratio: 1 / 1;
+	border-radius: 10px;
+	background:linear-gradient(145deg, #020617, #111827);;
+	border: 1px solid rgba(55, 65, 81, 0.9);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 12px;
+	color: #e5e7eb;
+	transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.board__cell span {
+	opacity: 0.85;
+}
+
+/* optional: active cell style (use later with JS) */
+.board__cell--active {
+	border-color: #22c55e;
+	box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.6), 0 6px 16px rgba(34, 197, 94, 0.25);
+	background: radial-gradient(circle at top left, #22c55e, #065f46);
+	color: #ecfdf5;
+	font-weight: 600;
+}
+
+/* Dice panel */
+.dice-panel {
+	background: rgba(15, 23, 42, 0.8);
+	border-radius: 18px;
+	padding: 16px 16px 18px;
+	border: 1px solid rgba(55, 65, 81, 0.9);
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+}
+
+.dice-panel__label {
+	font-size: 13px;
+	color: #9ca3af;
+	margin-bottom: 6px;
+}
+
+/* Current big dice */
+.dice-panel__current {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+.dice-panel__cube {
+	width: 90px;
+	height: 90px;
+	border-radius: 20px;
+	background: white;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	box-shadow: 0 14px 28px rgba(22, 163, 74, 0.4);
+	border: 1px solid rgba(34, 197, 94, 0.9);
+}
+
+.dice-panel__value {
+	font-size: 40px;
+	font-weight: 700;
+	color: #ecfdf5;
+}
+
+/* Small dice faces row */
+.dice-panel__faces {
+	display: flex;
+	flex-direction: column;
+}
+
+.dice-panel__faces-row {
+	display: flex;
+	justify-content: space-between;
+	gap: 8px;
+}
+
+.dice-face {
+	flex: 1;
+	max-width: 48px;
+	aspect-ratio: 1 / 1;
+	border-radius: 14px;
+	background: white;
+	border: 1px solid rgba(55, 65, 81, 0.9);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 14px;
+	color: #e5e7eb;
+	box-shadow: 0 8px 18px rgba(15, 23, 42, 0.8);
+}
+
+.dice-face span {
+	opacity: 0.9;
+}
+
+/* Actions */
+.dice-panel__actions {
+	margin-top: 4px;
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.btn-roll {
+	width: 100%;
+	border: none;
+	border-radius: 999px;
+	padding: 10px 16px;
+	font-size: 14px;
+	font-weight: 600;
+	cursor: pointer;
+	color: #0b1120;
+	background: linear-gradient(135deg, #22c55e, #a3e635);
+	box-shadow: 0 10px 22px rgba(34, 197, 94, 0.4);
+	transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.1s ease;
+}
+
+.btn-roll:hover {
+	transform: translateY(-1px);
+	box-shadow: 0 16px 34px rgba(34, 197, 94, 0.5);
+	filter: brightness(1.02);
+}
+
+.btn-roll:active {
+	transform: translateY(0);
+	box-shadow: 0 8px 18px rgba(34, 197, 94, 0.45);
+}
+
+.dice-panel__info {
+	font-size: 12px;
+	color: #9ca3af;
+	line-height: 1.4;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+	.dice-game__content {
+		grid-template-columns: 1fr;
+	}
+
+	.board {
+		order: 2;
+	}
+
+	.dice-panel {
+		order: 1;
+	}
+}
+
+@media (max-width: 600px) {
+	.dice-game__card {
+		padding: 16px;
+	}
+
+	.dice-game__title {
+		font-size: 20px;
+	}
+
+	.board__grid {
+		gap: 4px;
+	}
+}
+
+/* Big dice image inside cube */
+.dice-panel__cube-img {
+	width: 70%;
+	height: 70%;
+	object-fit: contain;
+	display: block;
+}
+
+/* Small dice faces row */
+.dice-face {
+	flex: 1;
+	max-width: 48px;
+	aspect-ratio: 1 / 1;
+	border-radius: 14px;
+	background: white;
+	border: 1px solid rgba(55, 65, 81, 0.9);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	box-shadow: 0 8px 18px rgba(15, 23, 42, 0.8);
+}
+
+/* Small dice image */
+.dice-face__img {
+	width: 80%;
+	height: 80%;
+	object-fit: contain;
+	display: block;
+}
+.board__cell--visited {
+	background: #fff9c4;
+	color: #111827;
+}
+
+.board__cell--active {
+	background: #ffeb3b;
+	border: 2px solid #f57f17;
+	color: #111827;
+	font-weight: 600;
+}
+
+.dice-history__item
+{
+    text-decoration: none;
+
+}
+
+ul {
+	list-style-type: none;
+	padding: 0;
+	margin: 0;
+}

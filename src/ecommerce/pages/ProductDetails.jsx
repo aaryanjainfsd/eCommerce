@@ -4,6 +4,8 @@ import { NavLink, useParams } from "react-router-dom";
 import instance from "../routes/axiosConfig";
 import { useCart } from "../contexts/CartProvider";
 import "../../assets/css/productDetail.css";
+import { useCurrency } from "../contexts/CurrencyProvider";
+
 
 // Import Files
 
@@ -14,6 +16,7 @@ export default function ProductDetails() {
     const [loading, setLoading] = useState(true);
     const [isInCart, setIsInCart] = useState(false);
     const [quantity, setQuantity] = useState(1);
+    const { convert, currency } = useCurrency();
 
     useEffect(() => {getProductData(id);}, [id]);
 	useEffect(() => {
@@ -143,7 +146,9 @@ export default function ProductDetails() {
                     <p className="product-desc">{product.description}</p>
 
                     <div className="product-price-box">
-                        <span className="product-price">${product.price}</span>
+                        <span className="product-price">
+							{currency} {convert(product.price).toFixed(2)}
+						</span>
                         <span className="price-tag">Inclusive of all taxes</span>
                     </div>
 
