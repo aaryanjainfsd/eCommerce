@@ -3,7 +3,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
 // Import custom files
 import Home from "../pages/Home";
-import Dice from "../pages/Dice";
+import Dice from "../pages/DiceGame";
 import Cart from "../pages/Cart";
 import Login from "../pages/Login";
 import AboutUs from "../pages/AboutUs";

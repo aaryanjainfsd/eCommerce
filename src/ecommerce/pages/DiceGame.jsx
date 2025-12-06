@@ -19,6 +19,26 @@ export default function DiceGame() {
 
     const currentPosition = positions[positions.length - 1];
 
+   function undoMove() {
+	// If only 1 position (0), nothing to undo
+	if (positions.length === 1) {
+		return;
+	}
+
+	// Remove last position
+	setPositions((prev) => {
+		const newArr = prev.slice(0, -1);
+		return newArr;
+	});
+
+    setRolls((prev) => {
+        const newArr = prev.slice(0, -1);
+        return newArr;
+    });
+
+}
+
+
     function handleRollDice() {
         // if game is already over, ignore clicks
         if (isGameOver === true) {  return; }
@@ -102,6 +122,10 @@ export default function DiceGame() {
         if (isVisited === true) {
             cellClass = cellClass + " board__cell--visited";
         }
+        else
+        {
+            cellClass = cellClass;
+        }
 
         // Active Cell Logic
         let isActive = false;
@@ -164,6 +188,10 @@ export default function DiceGame() {
                             <button type="button" className="btn-roll" onClick={handleRollDice} disabled={isGameOver === true} > 
                                 {isGameOver === true ? "Game Over" : "Roll the Dice"}
                             </button>
+                            <button type="button" className="btn-roll" onClick={undoMove} > 
+                                Undo
+                            </button>
+
 
                             <p className="dice-panel__info"> Current position:{" "} <strong>{currentPosition}</strong></p>
 
