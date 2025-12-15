@@ -1,0 +1,285 @@
+/* PAGE BACKGROUND */
+.auth-page {
+	min-height: 100vh;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 20px;
+	background: radial-gradient(circle at top left, #f97316 0, transparent 50%),
+		radial-gradient(circle at bottom right, #3b82f6 0, transparent 50%),
+		#0f172a;
+	font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+/* MAIN CARD */
+.auth-card {
+	position: relative; /* so OR can be absolutely positioned */
+	width: 100%;
+	max-width: 980px;
+	background: #020617;
+	border-radius: 24px;
+	box-shadow: 0 24px 70px rgba(15, 23, 42, 0.8);
+	display: grid;
+	grid-template-columns: 1.1fr 1.3fr; /* left | right */
+	overflow: hidden;
+	border: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+/* LEFT SIDE */
+.auth-left {
+	padding: 32px;
+	background: radial-gradient(circle at top, rgba(248, 250, 252, 0.12) 0, transparent 55%),
+		linear-gradient(135deg, rgba(56, 189, 248, 0.18), rgba(249, 115, 22, 0.12));
+	color: #f9fafb;
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+	justify-content: center;
+}
+
+.brand-title {
+	font-size: 28px;
+	font-weight: 700;
+	letter-spacing: 0.04em;
+	margin: 0;
+}
+
+.brand-tagline {
+	margin: 0;
+	font-size: 14px;
+	color: #e5e7eb;
+	max-width: 280px;
+}
+
+/* BUTTON BASE */
+.btn {
+	border: none;
+	outline: none;
+	cursor: pointer;
+	font-size: 14px;
+	font-weight: 500;
+	border-radius: 999px;
+	padding: 10px 18px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease,
+		opacity 0.15s ease;
+	white-space: nowrap;
+}
+
+/* WHITE GOOGLE BUTTON (like screenshot) */
+.google-btn {
+	background: #ffffff;
+	color: #111827;
+	box-shadow: 0 10px 30px rgba(15, 23, 42, 0.25);
+	width: fit-content;
+}
+
+.google-btn:hover {
+	transform: translateY(-1px);
+	box-shadow: 0 14px 35px rgba(15, 23, 42, 0.32);
+}
+
+.google-img {
+	width: 22px;
+	height: 22px;
+	border-radius: 50%;
+}
+
+/* LEFT NOTE */
+.auth-note {
+	font-size: 13px;
+	color: #e5e7eb;
+	margin-top: 4px;
+}
+
+.link-primary {
+	color: #f97316;
+	text-decoration: none;
+	font-weight: 500;
+}
+
+.link-primary:hover {
+	text-decoration: underline;
+}
+
+/* RIGHT SIDE */
+.auth-right {
+	padding: 32px 32px 32px 24px;
+	background: #020617;
+	color: #e5e7eb;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+}
+
+.form-title {
+	font-size: 22px;
+	font-weight: 600;
+	margin: 0 0 4px;
+	color: #f9fafb;
+}
+
+.form-subtitle {
+	margin: 0 0 18px;
+	font-size: 13px;
+	color: #9ca3af;
+}
+
+/* ERROR TEXT */
+.error-text {
+	background: rgba(248, 113, 113, 0.1);
+	color: #fecaca;
+	border: 1px solid rgba(248, 113, 113, 0.3);
+	padding: 8px 10px;
+	border-radius: 8px;
+	font-size: 13px;
+	margin-bottom: 12px;
+}
+
+/* INNER FORM BOX */
+.form-wrapper {
+	background: rgba(15, 23, 42, 0.7);
+	border-radius: 18px;
+	padding: 18px 18px 16px;
+	border: 1px solid rgba(31, 41, 55, 0.9);
+	backdrop-filter: blur(12px);
+}
+
+/* FORM FIELDS */
+.form-group {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	margin-bottom: 12px;
+}
+
+.form-group label {
+	font-size: 12px;
+	color: #9ca3af;
+}
+
+.form-group input {
+	background: #020617;
+	border-radius: 10px;
+	border: 1px solid rgba(55, 65, 81, 0.9);
+	padding: 9px 11px;
+	font-size: 14px;
+	color: #e5e7eb;
+	outline: none;
+	transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.form-group input::placeholder {
+	color: #6b7280;
+	font-size: 13px;
+}
+
+.form-group input:focus {
+	border-color: #f97316;
+	box-shadow: 0 0 0 1px rgba(249, 115, 22, 0.5);
+	background: #020617;
+}
+
+/* PRIMARY LOGIN BUTTON */
+.primary-btn {
+	margin-top: 8px;
+	width: 100%;
+	background: linear-gradient(135deg, #f97316, #fb923c);
+	color: #111827;
+	box-shadow: 0 14px 40px rgba(249, 115, 22, 0.35);
+}
+
+.primary-btn:hover {
+	transform: translateY(-1px);
+	box-shadow: 0 18px 48px rgba(249, 115, 22, 0.45);
+}
+
+.inProcess {
+	opacity: 0.8;
+	cursor: wait;
+}
+
+/* VERTICAL OR OVERLAY */
+.auth-or-center {
+	position: absolute;
+	/* horizontally near the middle where the two columns meet */
+	left: 45.8%;
+    top:0;
+	transform: translateX(-50%);
+	top: 30%; /* tweak 50–56 if you want it slightly higher/lower */
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+	pointer-events: none; /* clicks pass through to form */
+}
+
+.auth-or-line {
+	width: 2px;
+	height: 70px;
+	background: rgba(148, 163, 184, 0.6);
+}
+
+.auth-or-text {
+	font-size: 11px;
+	color: #9ca3af;
+	letter-spacing: 0.18em;
+	text-transform: uppercase;
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+	.auth-card {
+		grid-template-columns: 1fr;
+		max-width: 480px;
+	}
+
+	/* hide vertical OR on small screens */
+	.auth-or-center {
+		display: none;
+	}
+
+	.auth-left {
+		order: 1;
+		padding: 24px 20px;
+		text-align: center;
+		align-items: center;
+	}
+
+	.brand-tagline {
+		max-width: none;
+	}
+
+	.google-btn {
+		width: 100%;
+		justify-content: center;
+	}
+
+	.auth-right {
+		order: 2;
+		padding: 20px;
+	}
+}
+
+@media (max-width: 520px) {
+	.auth-page {
+		padding: 12px;
+	}
+
+	.auth-card {
+		border-radius: 18px;
+	}
+
+	.auth-left,
+	.auth-right {
+		padding: 18px 16px;
+	}
+
+	.brand-title {
+		font-size: 24px;
+	}
+}

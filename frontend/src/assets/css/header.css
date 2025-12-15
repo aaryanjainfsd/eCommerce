@@ -1,0 +1,249 @@
+/* Import modern font */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap");
+
+* {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+	font-family: "Inter", sans-serif;
+}
+
+.shopy-header {
+	background: linear-gradient(90deg, #1e1f29, #34354a);
+	color: #fff;
+	padding: 0.8rem 1.5rem;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+	position: sticky;
+	top: 0;
+	z-index: 1000;
+}
+
+.shopy-container {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	max-width: 1200px;
+	margin: 0 auto;
+}
+
+/* --- NAV LINKS --- */
+.shopy-nav-left {
+	display: flex;
+	gap: 1.5rem;
+}
+
+.shopy-nav-left a {
+	color: #d1d1d1;
+	text-decoration: none;
+	font-weight: 500;
+	transition: color 0.3s ease;
+}
+
+.shopy-nav-left a:hover,
+.shopy-nav-left a.active {
+	color: #ffffff;
+	border-bottom: 2px solid #f2f2f2;
+}
+
+/* --- LOGO --- */
+.shopy-logo a {
+	font-size: 1.5rem;
+	font-weight: 600;
+	color: #ffffff;
+	text-decoration: none;
+	letter-spacing: 1px;
+}
+
+/* --- ICONS SECTION --- */
+.shopy-icons {
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+	position: relative;
+}
+
+.shopy-icons a {
+	color: #e2e2e2;
+	transition: color 0.3s ease;
+}
+
+.shopy-icons a:hover {
+	color: #ffffff;
+}
+
+/* --- CART COUNT --- */
+.cart-icon {
+	position: relative;
+}
+
+.cart-count {
+	position: absolute;
+	top: -6px;
+	right: -10px;
+	background: #ff5555;
+	color: #fff;
+	font-size: 0.7rem;
+	font-weight: 600;
+	padding: 2px 6px;
+	border-radius: 50%;
+}
+
+/* --- PROFILE DROPDOWN --- */
+.profile-dropdown {
+	position: relative;
+}
+
+.profile-button {
+	background: none;
+	border: none;
+	color: #e2e2e2;
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	cursor: pointer;
+	font-weight: 500;
+	position: relative;
+}
+
+/* --- Username Pill --- */
+.username {
+	background: linear-gradient(135deg, #ff8a00, #e52e71);
+	color: white;
+	padding: 3px 10px;
+	border-radius: 20px;
+	font-size: 0.85rem;
+	font-weight: 600;
+	transition: all 0.3s ease;
+}
+
+.username:hover {
+	transform: scale(1.05);
+}
+
+/* --- Dropdown Menu --- */
+.dropdown-menu {
+	position: absolute;
+	right: 0;
+	top: 110%;
+	background: #2b2c3e;
+	border-radius: 8px;
+	padding: 0.8rem;
+	min-width: 130px;
+	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+}
+
+.dropdown-menu a,
+.dropdown-menu button {
+	color: #fff;
+	text-decoration: none;
+	background: none;
+	border: none;
+	text-align: left;
+	padding: 5px 0;
+	font-size: 0.9rem;
+	cursor: pointer;
+}
+
+.dropdown-menu a:hover,
+.dropdown-menu button:hover {
+	color: #ff8a00;
+}
+
+/* --- HAMBURGER MENU --- */
+.menu-toggle {
+	display: none;
+	background: none;
+	border: none;
+	color: #fff;
+	cursor: pointer;
+}
+
+/* --- MOBILE VIEW --- */
+@media (max-width: 768px) {
+	.shopy-nav-left {
+		position: fixed;
+		top: 0;
+		left: -100%;
+		flex-direction: column;
+		background: #1e1f29;
+		width: 70%;
+		height: 100vh;
+		padding-top: 5rem;
+		gap: 2rem;
+		align-items: flex-start;
+		padding-left: 2rem;
+		transition: left 0.3s ease;
+		z-index: 999;
+	}
+
+	.shopy-nav-left.open {
+		left: 0;
+	}
+
+	.shopy-icons {
+		gap: 0.5rem;
+	}
+
+	.menu-toggle {
+		display: block;
+	}
+}
+
+/* --- Refined Currency Selector --- */
+.currency-selector {
+	position: relative;
+	margin-right: 16px;
+}
+
+.currency-selector select {
+	background: #f9f9f9;
+	color: #222;
+	font-size: 14px;
+	font-weight: 500;
+	border: none;
+	border-radius: 8px;
+	padding: 6px 28px 6px 12px;
+	cursor: pointer;
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+	outline: none;
+	appearance: none;
+	transition: all 0.25s ease;
+	background-image: linear-gradient(45deg, transparent 50%, #555 50%),
+		linear-gradient(135deg, #555 50%, transparent 50%);
+	background-position: calc(100% - 16px) center, calc(100% - 11px) center;
+	background-size: 6px 6px, 6px 6px;
+	background-repeat: no-repeat;
+}
+
+.currency-selector select:hover {
+	background-color: #f1f1f1;
+	box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+}
+
+.currency-selector select:focus {
+	box-shadow: 0 0 0 2px #00000020;
+}
+
+.currency-selector::after {
+	content: "";
+	position: absolute;
+	top: 50%;
+	right: 12px;
+	transform: translateY(-50%);
+	pointer-events: none;
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+	.currency-selector {
+		margin-right: 10px;
+	}
+
+	.currency-selector select {
+		font-size: 13px;
+		padding: 5px 24px 5px 10px;
+	}
+}
