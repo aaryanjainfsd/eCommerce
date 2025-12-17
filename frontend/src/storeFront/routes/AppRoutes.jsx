@@ -3,7 +3,6 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
 // Import custom files
 import Home from "../pages/Home";
-import Dice from "../pages/DiceGame";
 import Cart from "../pages/Cart";
 import Login from "../pages/Login";
 import AboutUs from "../pages/AboutUs";
@@ -13,6 +12,9 @@ import AllProducts from "../pages/AllProducts";
 import ProductDetails from "../pages/ProductDetails";
 import OutletComponent from "../components/OutletComponent";
 import ProtectedRoute from "../routes/ProtectedRoute";
+
+import Dice from "../pages/DiceGame";
+import ItemShiftTask from "../pages/ItemShiftTask";
 
 // Contexts
 
@@ -32,8 +34,11 @@ const router = createBrowserRouter([
             { path: "/login", element: <Login /> },
             { path: "/register", element: <Register /> },
             { path: "/cart", element: <Cart /> },
-            { path: "/dice", element: <Dice /> },
             { path: "/checkout", element: (<ProtectedRoute> <Checkout/> </ProtectedRoute>)},
+            
+            //Random tasks 
+            { path: "/dice", element: <Dice /> },
+            { path: "/itemShiftTask", element: <ItemShiftTask /> },
         ],
     },
 ]);

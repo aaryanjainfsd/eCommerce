@@ -1,0 +1,125 @@
+* {
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+	font-family: "Segoe UI", system-ui, sans-serif;
+}
+
+/* Page background */
+.page {
+	min-height: 100vh;
+	background-color: #0f172a;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: #e5e7eb;
+}
+
+/* Main card */
+.card {
+	width: 900px;
+	background-color: #020617;
+	border: 1px solid #1e293b;
+	border-radius: 10px;
+	padding: 28px;
+	box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+}
+
+/* Title */
+.pageTitle {
+	font-size: 22px;
+	font-weight: 600;
+	color: #f8fafc;
+	margin-bottom: 6px;
+}
+
+/* Subtitle */
+.pageSubtitle {
+	font-size: 14px;
+	color: #94a3b8;
+	margin-bottom: 24px;
+}
+
+/* Main layout */
+.layout {
+	display: flex;
+	align-items: center;
+	gap: 24px;
+}
+
+/* Panels */
+.panel {
+	flex: 1;
+	border: 1px solid #1e293b;
+	border-radius: 8px;
+	background-color: #020617;
+	display: flex;
+	flex-direction: column;
+	height: 320px;
+}
+
+/* Panel header */
+.panelHeader {
+	padding: 12px 14px;
+	font-size: 14px;
+	font-weight: 600;
+	color: #c7d2fe;
+	border-bottom: 1px solid #1e293b;
+	background-color: #020617;
+}
+
+/* Panel body */
+.panelBody {
+	list-style: none;
+	padding: 12px;
+	overflow-y: auto;
+	flex: 1;
+}
+
+/* Items */
+.panelBody li {
+	padding: 8px;
+	border-radius: 6px;
+}
+
+.panelBody li:hover {
+	background-color: #020617;
+}
+
+.panelBody label {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	cursor: pointer;
+	font-size: 14px;
+}
+
+/* Checkbox */
+.panelBody input[type="checkbox"] {
+	accent-color: #6366f1;
+}
+
+/* Actions */
+.actions {
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+}
+
+/* Buttons */
+.actionBtn {
+	width: 44px;
+	height: 44px;
+	border-radius: 6px;
+	border: 1px solid #1e293b;
+	background-color: #020617;
+	color: #e5e7eb;
+	font-size: 18px;
+	cursor: pointer;
+	transition: all 0.2s ease;
+}
+
+.actionBtn:hover {
+	border-color: #6366f1;
+	background-color: #020617;
+}

@@ -20,23 +20,23 @@ export default function DiceGame() {
     const currentPosition = positions[positions.length - 1];
 
    function undoMove() {
-	// If only 1 position (0), nothing to undo
-	if (positions.length === 1) {
-		return;
-	}
+        // If only 1 position (0), nothing to undo
+        if (positions.length === 1) {
+            return;
+        }
 
-	// Remove last position
-	setPositions((prev) => {
-		const newArr = prev.slice(0, -1);
-		return newArr;
-	});
+        // Remove last position
+        setPositions((prev) => {
+            const newArr = prev.slice(0, -1);
+            return newArr;
+        });
 
-    setRolls((prev) => {
-        const newArr = prev.slice(0, -1);
-        return newArr;
-    });
-
-}
+        setRolls((prev) => {
+            const newArr = prev.slice(0, -1);
+            return newArr;
+        });
+        
+    }
 
 
     function handleRollDice() {
