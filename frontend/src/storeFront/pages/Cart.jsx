@@ -1,13 +1,19 @@
-import { useEffect, useState, useRef } from "react";
-import { useCart } from "../contexts/CartProvider";
-import instance from "../../shared/config/axiosConfig";
-import { NavLink } from "react-router-dom";
 import "../../assets/css/cart.css";
-import { useCurrency } from "../contexts/CurrencyProvider";
+import { NavLink } from "react-router-dom";
+import useCartStore from "../stores/cartStore";
+import { useEffect, useState, useRef } from "react";
 
+import instance from "../../shared/config/axiosConfig";
+import { useCurrency } from "../contexts/CurrencyProvider";
+// import { useCart } from "../contexts/CartProvider";
 
 function Cart() {
-    const { cart, setCart } = useCart();
+    const cart = useCartStore((state) => state.cart);
+    const setCart = useCartStore((state) => state.setCart);
+
+console.log("Cart Store Cart:", cart);
+    // const { cart, setCart } = useCart();
+
     const [cartItems, setCartItems] = useState([]);
     const [loading, setLoading] = useState(false);
     const hasLoadedOnce = useRef(false);
@@ -22,7 +28,7 @@ function Cart() {
         if (!hasLoadedOnce.current) setLoading(true);
         try {
             const responses = await Promise.all(
-                cart.map((item) => instance.get(`/product/product/${item.id}`))
+                cart.map((item) => instance.get(`/products/${item.id}`))
             );
             const updated = responses.map((res, index) => ({
                 ...res.data,
@@ -38,18 +44,18 @@ function Cart() {
     }
 
     function handleQuantityChange(id, change) {
-        setCart((prev) =>
-            prev
-                .map((item) => {
-                    if (item.id === id) {
-                        const newQuantity = item.quantity + change;
-                        if (newQuantity <= 0) return null;
-                        return { ...item, quantity: newQuantity };
-                    }
-                    return item;
-                })
-                .filter(Boolean)
-        );
+        const updatedCart = cart
+            .map((item) => {
+                if (item.id === id) {
+                    const newQuantity = item.quantity + change;
+                    if (newQuantity <= 0) return null;
+                    return { ...item, quantity: newQuantity };
+                }
+                return item;
+            })
+            .filter(Boolean);
+
+        setCart(updatedCart);
     }
 
     function handleDelete(id) {
@@ -57,7 +63,8 @@ function Cart() {
     }
 
     const totalAmount = cartItems.reduce(
-        (sum, item) => sum + (convert(item.price).toFixed(2) || 0) * (item.quantity || 1),
+        (sum, item) =>
+            sum + (convert(item.price).toFixed(2) || 0) * (item.quantity || 1),
         0
     );
 
@@ -109,7 +116,8 @@ function Cart() {
                             <div className="prod-details">
                                 <h3 className="prod-title">{item.name}</h3>
                                 <p className="prod-meta">
-                                    Price: {currency} {convert(item.price).toFixed(2)}
+                                    Price: {currency}{" "}
+                                    {convert(item.price).toFixed(2)}
                                 </p>
                                 <p className="prod-meta">In Stock</p>
 
@@ -123,7 +131,9 @@ function Cart() {
                             </div>
                         </div>
 
-                        <div className="each-price">{currency} {convert(item.price).toFixed(2)}</div>
+                        <div className="each-price">
+                            {currency} {convert(item.price).toFixed(2)}
+                        </div>
 
                         <div className="qty-select-box">
                             <select
@@ -144,10 +154,10 @@ function Cart() {
                         </div>
 
                         <div className="total-price">
-                            {currency} 
-                            {(convert(item.price).toFixed(2) * item.quantity).toLocaleString(
-                                "en-IN"
-                            )}
+                            {currency}
+                            {(
+                                convert(item.price).toFixed(2) * item.quantity
+                            ).toLocaleString("en-IN")}
                         </div>
                     </div>
                 ))}
@@ -184,7 +194,9 @@ function Cart() {
 
                     <div className="summary-row total-row">
                         <span>Estimated Total</span>
-                        <span>{currency} {totalAmount.toLocaleString("en-IN")}</span>
+                        <span>
+                            {currency} {totalAmount.toLocaleString("en-IN")}
+                        </span>
                     </div>
 
                     <button className="checkout-button">Checkout</button>

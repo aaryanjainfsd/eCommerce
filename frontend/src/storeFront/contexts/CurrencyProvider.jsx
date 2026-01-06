@@ -1,7 +1,7 @@
 // src/ecommerce/contexts/CurrencyProvider.jsx
 
 import { createContext, useContext, useEffect, useState } from "react";
-import { fetchRates } from "../thirdPartyAPIs/currencyAPI";
+import { fetchRates } from "../apis/thirdPartyAPIs/currencyAPI";
 
 const CurrencyContext = createContext();
 

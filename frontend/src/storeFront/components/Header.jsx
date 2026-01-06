@@ -25,8 +25,7 @@ export default function Header() {
     const navigate = useNavigate();
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [menuOpen, setMenuOpen] = useState(false);
-    const { currency, setCurrency, rates, setRates, currencyList } =
-        useCurrency();
+    const { currency, setCurrency, rates, setRates, currencyList } = useCurrency();
 
     const name = currentUser
         ? currentUser.displayName

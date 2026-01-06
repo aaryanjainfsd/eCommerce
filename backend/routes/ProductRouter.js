@@ -5,7 +5,7 @@ import uploadCloud from '../middleware/uploadCloud.js'; // memory for cloud
 import validateNewProduct from "../middleware/validateNewProduct.js";
 
 
-import { addProduct, deleteProduct, getProducts, updateProduct } from '../controllers/ProductController.js';
+import { addProduct, deleteProduct, getProducts, updateProduct, getSingleProduct } from '../controllers/ProductController.js';
 
 
 const useLocal = true;
@@ -30,8 +30,8 @@ productRouter.post(
     // Controller Address
     addProduct
 );
-
-// productRouter.put('/update/:id', (useCloud ? uploadCloud : uploadLocal.single("image")), updateProduct);
+productRouter.get('/get/:id', getSingleProduct);
+productRouter.put('/update/:id', (useCloud ? uploadCloud : uploadLocal.single("image")), updateProduct);
 productRouter.delete('/delete/:id', deleteProduct);
 
 export default productRouter;

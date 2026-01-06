@@ -79,3 +79,30 @@ export async function updateProduct(req, res) {
 export async function deleteProduct(req, res) {
     console.log(req.body);
 }
+
+// Get Single Product by ID
+export async function getSingleProduct(req, res) {
+	try {
+        console.log("Fetching product with ID:", req.params.id);
+		const { id } = req.params;
+
+		const product = await ProductModel.findById(id);
+
+		if (!product) {
+			return res.status(404).json({
+				message: "Product not found"
+			});
+		}
+		return res.status(200).json({
+			message: "Product fetched successfully",
+			product: product
+		});
+	} catch (error) {
+		console.error("Error fetching product:", error);
+
+		return res.status(500).json({
+			message: "Failed to fetch product",
+			error: error.message
+		});
+	}
+}

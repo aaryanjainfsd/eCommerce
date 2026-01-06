@@ -2,39 +2,68 @@
 import { useEffect, useState } from "react";
 import { NavLink, useParams } from "react-router-dom";
 import instance from "../../shared/config/axiosConfig";
-import { useCart } from "../contexts/CartProvider";
-import "../../assets/css/productDetail.css";
 import { useCurrency } from "../contexts/CurrencyProvider";
+import "../../assets/css/productDetail.css";
 
+// import { useCart } from "../contexts/CartProvider";
+
+// ✅ Import Zustand cart store
+import useCartStore from "../stores/cartStore";
 
 // Import Files
-
 export default function ProductDetails() {
     const { id } = useParams();
-	const { cart, setCart } = useCart();
+
+    // -------------------------
+    // ZUSTAND CART STATE
+    // -------------------------
+    const cart = useCartStore((state) => state.cart);
+    const addToCart = useCartStore((state) => state.addToCart);
+    const increaseQty = useCartStore((state) => state.increaseQty);
+    const decreaseQty = useCartStore((state) => state.decreaseQty);
+    const removeFromCart = useCartStore((state) => state.removeFromCart);
+
+    // -------------------------
+    // LOCAL STATE
+    // -------------------------
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
     const [isInCart, setIsInCart] = useState(false);
     const [quantity, setQuantity] = useState(1);
+
+    // -------------------------
+    // CONTEXT CALL
+    // -------------------------
     const { convert, currency } = useCurrency();
 
-    useEffect(() => {getProductData(id);}, [id]);
-	useEffect(() => {
+    // -------------------------
+    // FETCH PRODUCT
+    // -------------------------
+    useEffect(() => {
+        getProductData(id);
+    }, [id]);
+
+    // -------------------------
+    // SYNC CART ↔ UI
+    // -------------------------
+    useEffect(() => {
         if (!product) return;
-        const existing = cart.find((item) => item.id === product._id);
-		if (existing) {
-			setIsInCart(true);
-			setQuantity(existing.quantity);
-		} else {
-			setIsInCart(false);
-			setQuantity(1);
-		} 
+
+        const existing = cart.find((item) => item.id === product.product._id);
+
+        if (existing) {
+            setIsInCart(true);
+            setQuantity(existing.quantity);
+        } else {
+            setIsInCart(false);
+            setQuantity(1);
+        }
     }, [cart, product]);
 
     async function getProductData() {
         try {
             setLoading(true);
-            const response = await instance.get("/product/product/" + id);
+            const response = await instance.get("/products/get/" + id);
 
             if (response.data.length === 0) {
                 setLoading(false);
@@ -50,138 +79,124 @@ export default function ProductDetails() {
         }
     }
 
-	function handleAddToCart(idToAdd, getQuantity = 1) 
-    {
-        const exist = cart.find((item) => item.id === idToAdd);
-        if (exist) 
-        {
-            setCart((items) =>
-                        items.map((item) =>
-                            item.id === idToAdd
-                            ? {...item, quantity: item.quantity + getQuantity} : item
-                        )
-                    );
-        }
-        else
-        {
-            setCart([...cart,{ id: idToAdd, quantity: getQuantity }]);
-        }
+    // -------------------------
+    // CART ACTIONS (NOW VERY SIMPLE)
+    // -------------------------
+    function handleAddToCart() {
+        addToCart(product.product._id, quantity);
+    }
 
-        setIsInCart(true);
-	}
-
-    function handleIncrease()
-    {
-        if (!product)
-        {
-            return;
-        }
-        else
-        {
-            const existing = cart.find(items => items.id === product._id)
-            if(!existing)
-            {
-                handleAddToCart(product._id, quantity + 1);
-            }
-            else
-            {
-                setCart((items) => 
-                    items.map((item) => 
-                        item.id === product._id 
-                        ? {...item, quantity: item.quantity +1} 
-                        : item
-                    )
-                );
-            }
+    function handleIncrease() {
+        if (!isInCart) {
+            setQuantity((prev) => prev + 1);
+        } else {
+            increaseQty(product.product._id);
         }
     }
 
-    function handleDecrease()
-    {
-        if (!product)
-        {
-            return;
-        }
-        else
-        {
-            const existing = cart.find(items => items.id === product._id)
-            if(!existing)
-            {
-                setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
-            }
-            else
-            {
-                setCart((items) => 
-                    items
-                    .map((item) => 
-                        item.id === product._id 
-                        ? {...item, quantity: item.quantity - 1} 
-                        : item
-                    ).filter((item) => item.quantity > 0)
-                );
-            }
+    function handleDecrease() {
+        if (!isInCart) {
+            setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
+        } else {
+            decreaseQty(product.product._id);
         }
     }
 
-    function handleRemoveFromCart(idToRemove) {
-		setCart((items) => items.filter((item) => item.id !== idToRemove));
-		setIsInCart(false);
-		setQuantity(1);
-	}
-    
-    if (loading)  return <p className="loading-text">Loading product details...</p>;
+    function handleRemoveFromCart() {
+        removeFromCart(product.product._id);
+        setIsInCart(false);
+        setQuantity(1);
+    }
+
+    if (loading) return <p className="loading-text">Loading product details...</p>;
     if (!product) return <p className="error-text">Product not found.</p>;
 
     return (
         <div className="product-detail-page">
             <div className="product-wrapper">
                 <div className="product-image-box">
-                    <img src={product.image} alt={product.title} className="product-main-img" />
+                    <img
+                        src={product.product.image}
+                        alt={product.product.title}
+                        className="product-main-img"
+                    />
                 </div>
 
                 <div className="product-info-box">
-                    <h1 className="product-title">{product.name}</h1>
-                    <p className="product-code">Code: {product.code}</p>
+                    <h1 className="product-title">{product.product.name}</h1>
+                    <p className="product-code">Code: {product.product.code}</p>
 
-                    <p className="product-desc">{product.description}</p>
+                    <p className="product-desc">
+                        {product.product.description}
+                    </p>
 
                     <div className="product-price-box">
                         <span className="product-price">
-							{currency} {convert(product.price).toFixed(2)}
-						</span>
-                        <span className="price-tag">Inclusive of all taxes</span>
+                            {currency}{" "}
+                            {convert(
+                                Number(product.product.orignalPrice)
+                            ).toFixed(2)}
+                        </span>
+                        <span className="price-tag">
+                            Inclusive of all taxes
+                        </span>
                     </div>
 
                     {/* Quantity selector */}
                     <div className="quantity-container">
                         <p className="quantity-label">Quantity</p>
                         <div className="quantity-controls">
-                            <button className="qty-btn" onClick={handleDecrease}>−</button>
+                            <button
+                                className="qty-btn"
+                                onClick={handleDecrease}
+                            >
+                                −
+                            </button>
                             <span className="qty-value">{quantity}</span>
-                            <button className="qty-btn" onClick={handleIncrease}> +</button>
+                            <button
+                                className="qty-btn"
+                                onClick={handleIncrease}
+                            >
+                                {" "}
+                                +
+                            </button>
                         </div>
                     </div>
 
                     {/* Action buttons */}
                     <div className="product-action-buttons">
-                        	{
-                                !isInCart ? 
-                                (
-                                    <button onClick={() => handleAddToCart(product._id, quantity)} className="btn-add-cart" > Add to Cart </button>
-                                ): 
-                                (
-                                    <button onClick={() => handleRemoveFromCart(product._id)} className="btn-remove-cart" > 🗑️ Remove from Cart </button>
-                                )
-                            }  
-                         <NavLink to="/cart" >
-                            <button className="btn-buy-now">⚡ Go to Cart</button>
+                        {!isInCart ? (
+                            <button
+                                onClick={() =>
+                                    handleAddToCart(
+                                        product.product._id,
+                                        quantity
+                                    )
+                                }
+                                className="btn-add-cart"
+                            >
+                                {" "}
+                                Add to Cart{" "}
+                            </button>
+                        ) : (
+                            <button
+                                onClick={() =>
+                                    handleRemoveFromCart(product.product._id)
+                                }
+                                className="btn-remove-cart"
+                            >
+                                {" "}
+                                🗑️ Remove from Cart{" "}
+                            </button>
+                        )}
+                        <NavLink to="/cart">
+                            <button className="btn-buy-now">
+                                ⚡ Go to Cart
+                            </button>
                         </NavLink>
                     </div>
                 </div>
             </div>
         </div>
     );
-
-
-    
 }
