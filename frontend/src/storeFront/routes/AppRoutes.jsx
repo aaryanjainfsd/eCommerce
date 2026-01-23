@@ -28,12 +28,12 @@ const router = createBrowserRouter([
         element: <OutletComponent />,
         children: [
             { index: true, element: <Home /> },
+            { path: "/cart", element: <Cart /> },
+            { path: "/login", element: <Login /> },
+            { path: "/aboutus", element: <AboutUs /> },
+            { path: "/register", element: <Register /> },
             { path: "/allproducts", element: <AllProducts /> },
             { path: "/product-details/:id", element: <ProductDetails /> },
-            { path: "/aboutus", element: <AboutUs /> },
-            { path: "/login", element: <Login /> },
-            { path: "/register", element: <Register /> },
-            { path: "/cart", element: <Cart /> },
             { path: "/checkout", element: (<ProtectedRoute> <Checkout/> </ProtectedRoute>)},
             
             //Random tasks 

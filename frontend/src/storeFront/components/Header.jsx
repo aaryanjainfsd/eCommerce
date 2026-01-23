@@ -13,7 +13,7 @@ import { app } from "../firebase.js";
 const db = getDatabase(app);
 
 export default function Header() {
-    const { currentUser, isLoggedIn, logout } = useFirebase();
+            const { currentUser, isLoggedIn, logout } = useFirebase();
     const checkClicks = () => {
         set(ref(db, "users/clicks"), {
             userIPAddress: "198:196:197:198",

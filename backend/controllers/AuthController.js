@@ -92,7 +92,7 @@ export async function loginUser(req, res) {
 	}
 }
 
-export async function getUser(req, res) {
+export async function getSingleUser(req, res) {
 	try {
 		const userId = req.params.id;
 
@@ -122,7 +122,7 @@ export async function getAllUsers(req, res) {
     {
         const users = await AuthModel.find();
         res.status(200).json({
-            message: "All users fetched successfully",
+            message: "All Users fetched successfully - Message Coming from eComForAll/backend/Controllers/getAllUsers",
             users
         });
     }              
@@ -171,15 +171,30 @@ export async function updateUser(req, res) {
         const userId = req.params.id;       
         const updateData = req.body;    
 
+
+        if (updateData.password) {
+			const salt = await bcrypt.genSalt(10);
+			const hashedPassword = await bcrypt.hash(updateData.password, salt);
+			updateData.password = hashedPassword;
+		}
+
         const updateObj = {
 			$set: updateData,
 			$inc: { __v: 1 }
 		};
+        console.log("Update Object:", updateObj);
+
+        // hash password
+        // const salt = await bcrypt.genSalt(10);
+        // const hashedPassword = await bcrypt.hash(password, salt);
 
         const updatedUser = await AuthModel.findByIdAndUpdate(
 			userId,
 			updateObj,
-			{ new: true, runValidators: true }
+			{ 
+                new: true, // return the updated data of user or anything
+                runValidators: true 
+            }
 		);
         
 
