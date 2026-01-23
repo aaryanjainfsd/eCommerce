@@ -1,9 +1,10 @@
 import AuthModel from '../models/AuthModel.js';
+import jwt from "jsonwebtoken";
 import bcrypt from 'bcryptjs';
 
 export async function registerUser(req, res) {
     try {
-		const { name, email, password, role, avatar } = req.body;
+		const { name, email, username, phone, password, role, avatar } = req.body;
 
 		// check if user already exists
 		const existing = await AuthModel.findOne({ email });
@@ -17,6 +18,8 @@ export async function registerUser(req, res) {
 			// create user with hashed password
 			const newUser = await AuthModel.create({
 				name,
+                username,
+                phone,
 				email,
 				password: hashedPassword,
 				role,
@@ -57,6 +60,26 @@ export async function loginUser(req, res) {
 			} 
             else 
             {
+
+                // -------------------------
+				// CREATE JWT TOKEN
+				// -------------------------
+				const token = jwt.sign(
+					{ id: user._id, email: user.email },
+					process.env.JWT_SECRET,
+					{ expiresIn: "7d" }
+				);
+
+				// -------------------------
+				// STORE TOKEN IN COOKIE
+				// -------------------------
+				res.cookie("token", token, {
+					httpOnly: true,
+					secure: false,
+					sameSite: "strict",
+					maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+				});
+                
 				res.status(200).json({
 					message: "Login successful",
 					user

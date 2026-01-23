@@ -11,3 +11,4 @@ authRouter.post('/register', registerUser);
 authRouter.delete('/delete/:id', deleteUser);
 authRouter.put('/update/:id', updateUser);
 export default authRouter;
+

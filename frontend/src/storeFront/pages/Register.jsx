@@ -4,6 +4,8 @@ import { Link, useNavigate } from "react-router-dom";
 
 import { useFirebase } from "../contexts/FirebaseProvider";
 
+import { registerUserService } from "../apis/services/auth.service";
+
 function Register() {
     const firebaseContext = useFirebase();
 
@@ -23,32 +25,60 @@ function Register() {
         setData({ ...data, [name]: value });
     }
 
+    // Store data in our mongoose database
     async function handleSubmit(e) {
         e.preventDefault();
-        try 
-        {
+
+        try {
             setIsSubmitting(true);
 
-            const cred = await firebaseContext.createUserInFirebase( data.email, data.password );
-            const uid = cred.user.uid;
-            const profile = {
+            const userDataVar = {
                 name: data.name,
                 username: data.username,
                 phone: data.phone,
                 email: data.email,
+                password: data.password
             };
-            await firebaseContext.insert_db_fireStore_userData( uid, profile );
-            navigate("/");
-        } catch (error) 
-        {
+            console.log(userDataVar);
+
+            const response = await registerUserService(userDataVar);
+            console.log("Register success:", response);
+            navigate("/login");
+        } catch (error) {
             console.log("Registration error:", error);
             setIsError(error.message || "Registration failed");
-        }
-        finally 
-        {
+        } finally {
             setIsSubmitting(false);
         }
     }
+
+    // FIreBASE NORMAL Register
+    // async function handleSubmit(e) {
+    //     e.preventDefault();
+    //     try
+    //     {
+    //         setIsSubmitting(true);
+
+    //         const cred = await firebaseContext.createUserInFirebase( data.email, data.password );
+    //         const uid = cred.user.uid;
+    //         const profile = {
+    //             name: data.name,
+    //             username: data.username,
+    //             phone: data.phone,
+    //             email: data.email,
+    //         };
+    //         await firebaseContext.insert_db_fireStore_userData( uid, profile );
+    //         navigate("/");
+    //     } catch (error)
+    //     {
+    //         console.log("Registration error:", error);
+    //         setIsError(error.message || "Registration failed");
+    //     }
+    //     finally
+    //     {
+    //         setIsSubmitting(false);
+    //     }
+    // }
 
     async function handleGoogleSignUp() {
         setIsError(null);
@@ -87,7 +117,12 @@ function Register() {
                         offers.
                     </p>
 
-                    <button type="button" className="btn google-btn" onClick={handleGoogleSignUp} disabled={isSubmitting} >
+                    <button
+                        type="button"
+                        className="btn google-btn"
+                        onClick={handleGoogleSignUp}
+                        disabled={isSubmitting}
+                    >
                         <img
                             src="https://developers.google.com/identity/images/g-logo.png"
                             alt="Google Logo"
@@ -142,7 +177,11 @@ function Register() {
                                         type="text"
                                         placeholder="Enter Username"
                                         name="username"
-                                        id="username" value={data.username} onChange={handleChange} required />
+                                        id="username"
+                                        value={data.username}
+                                        onChange={handleChange}
+                                        required
+                                    />
                                 </div>
                             </div>
 
