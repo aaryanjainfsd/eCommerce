@@ -85,7 +85,6 @@ export async function getSingleProduct(req, res) {
 	try {
         console.log("Fetching product with ID:", req.params.id);
 		const { id } = req.params;
-
 		const product = await ProductModel.findById(id);
 
 		if (!product) {
@@ -99,7 +98,6 @@ export async function getSingleProduct(req, res) {
 		});
 	} catch (error) {
 		console.error("Error fetching product:", error);
-
 		return res.status(500).json({
 			message: "Failed to fetch product",
 			error: error.message

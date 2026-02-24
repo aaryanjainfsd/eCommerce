@@ -59,7 +59,7 @@ const useCartStore = create(
                 // If quantity becomes 0, remove item
                 // -------------------------
                 decreaseQty: function (id) {
-                    const cart = get.cart();
+                    const cart = get().cart;
                     const updatedCart = cart.map(function (item) {
                         if (item.id === id) {
                             return { ...item, quantity: item.quantity - 1 };

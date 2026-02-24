@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client'
 
 // Import Files
 import './assets/css/main.css'
-import AppRoutes from "./storeFront/routes/AppRoutes";
+import AppRoutes from "./routes/AppRoutes";
 
 // Render Application
 createRoot(document.getElementById('root')).render(<AppRoutes />);

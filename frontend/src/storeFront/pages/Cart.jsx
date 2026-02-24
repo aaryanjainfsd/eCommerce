@@ -1,81 +1,84 @@
 import "../../assets/css/cart.css";
 import { NavLink } from "react-router-dom";
-import useCartStore from "../stores/cartStore";
 import { useEffect, useState, useRef } from "react";
 
+import useCartStore from "../stores/cartStore";
 import instance from "../../shared/config/axiosConfig";
 import { useCurrency } from "../contexts/CurrencyProvider";
-// import { useCart } from "../contexts/CartProvider";
 
 function Cart() {
+    // ================= ZUSTAND STATE =================
     const cart = useCartStore((state) => state.cart);
-    const setCart = useCartStore((state) => state.setCart);
+    const increaseQty = useCartStore((state) => state.increaseQty);
+	const decreaseQty = useCartStore((state) => state.decreaseQty);
+	const setQty = useCartStore((state) => state.setQty);
+	const removeFromCart = useCartStore((state) => state.removeFromCart);
 
-console.log("Cart Store Cart:", cart);
-    // const { cart, setCart } = useCart();
+    // ================= LOCAL STATE =================
+	const [cartItems, setCartItems] = useState([]);
+	const [loading, setLoading] = useState(false);
+	const hasLoadedOnce = useRef(false);
 
-    const [cartItems, setCartItems] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const hasLoadedOnce = useRef(false);
     const { convert, currency } = useCurrency();
-
-    useEffect(() => {
-        if (cart.length > 0) getCartProducts();
-        else setCartItems([]);
+    
+    useEffect(() =>{
+        if (cart.length > 0) {
+            getCartProducts();
+        }
+        else{
+            setCartItems([]);
+        }
     }, [cart]);
 
+    
     async function getCartProducts() {
-        if (!hasLoadedOnce.current) setLoading(true);
-        try {
+        if (!hasLoadedOnce.current) {
+			setLoading(true);
+		}
+        try{
             const responses = await Promise.all(
-                cart.map((item) => instance.get(`/products/${item.id}`))
-            );
-            const updated = responses.map((res, index) => ({
-                ...res.data,
-                quantity: cart[index].quantity,
-            }));
+				cart.map(function (item) {
+					return instance.get(`products/get/${item.id}`);
+				})
+			);
+
+            const updated = responses.map( function (res, index) {
+                return {
+                    ...res.data,
+                    quantity: cart[index].quantity,
+                };
+            });
             setCartItems(updated);
             hasLoadedOnce.current = true;
-        } catch (error) {
+        }
+        catch (error)
+        {
             console.error("Error fetching cart products:", error);
-        } finally {
+        }
+        finally
+        {
             setLoading(false);
+        }
+
+    }
+
+
+
+
+    function handleQuantityChange(productId, newQty) {
+        if (newQty >= 1) {
+            setQty(productId, newQty);
+        }
+        else {
+            setQty(productId, 1);
         }
     }
 
-    function handleQuantityChange(id, change) {
-        const updatedCart = cart
-            .map((item) => {
-                if (item.id === id) {
-                    const newQuantity = item.quantity + change;
-                    if (newQuantity <= 0) return null;
-                    return { ...item, quantity: newQuantity };
-                }
-                return item;
-            })
-            .filter(Boolean);
 
-        setCart(updatedCart);
-    }
 
-    function handleDelete(id) {
-        setCart((prev) => prev.filter((item) => item.id !== id));
-    }
 
-    const totalAmount = cartItems.reduce(
-        (sum, item) =>
-            sum + (convert(item.price).toFixed(2) || 0) * (item.quantity || 1),
-        0
-    );
 
-    if (loading) {
-        return (
-            <div className="cart-loader-container">
-                <div className="spinner"></div>
-                <p>Loading your cart...</p>
-            </div>
-        );
-    }
+
 
     if (cartItems.length === 0) {
         return (
@@ -97,6 +100,10 @@ console.log("Cart Store Cart:", cart);
             </div>
         );
     }
+
+    cartItems.map((item) => console.log(item));
+
+    
     return (
         <div className="cart-wrapper-new">
             <div className="cart-left-new">
@@ -104,63 +111,44 @@ console.log("Cart Store Cart:", cart);
                     <i className="ri-shopping-bag-3-line"></i> My Cart
                 </h2>
 
-                {cartItems.map((item) => (
-                    <div className="row-item" key={item._id}>
-                        <div className="left-product-info">
-                            <img
-                                src={item.image}
-                                className="prod-img"
-                                alt={item.name}
-                            />
+                {cartItems.map((item) => {
+                    return (
+                        <div className="row-item" key={item.product._id}>
+                            <div className="left-product-info">
+                                <img src={item.product.image} className="prod-img" alt={item.product.name} />
 
-                            <div className="prod-details">
-                                <h3 className="prod-title">{item.name}</h3>
-                                <p className="prod-meta">
-                                    Price: {currency}{" "}
-                                    {convert(item.price).toFixed(2)}
-                                </p>
-                                <p className="prod-meta">In Stock</p>
-
-                                <div className="small-actions">
-                                    <span
-                                        onClick={() => handleDelete(item._id)}
-                                    >
-                                        Remove
-                                    </span>
+                                <div className="prod-details">
+                                    <h3 className="prod-title"> {item.product.name} </h3>
+                                    <p className="prod-meta"> Price: {currency}{" "} {item.product.discountedPrice} </p>
+                                    <p className="prod-meta">In Stock</p>
+                                    <div className="small-actions"> <span onClick={() => handleDelete(item._id)} > Remove </span> </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <div className="each-price">
-                            {currency} {convert(item.price).toFixed(2)}
-                        </div>
+                            <div className="each-price"> {currency}{" "} {item.product.discountedPrice} </div>
 
-                        <div className="qty-select-box">
-                            <select
-                                value={item.quantity}
-                                onChange={(e) =>
-                                    handleQuantityChange(
-                                        item._id,
-                                        Number(e.target.value) - item.quantity
-                                    )
-                                }
-                            >
-                                {[1, 2, 3, 4, 5, 6, 7, 8].map((q) => (
-                                    <option key={q} value={q}>
-                                        {q}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
+                            <div className="qty-select-box">
+                                <select value={item.quantity} onChange={(e) => { handleQuantityChange( item.product._id, Number(e.target.value) ); }} >
+                                    {[1, 2, 3, 4, 5, 6, 7, 8].map((q) => {
+                                        return (
+                                            <option key={q} value={q}>
+                                                {q}
+                                            </option>
+                                        );
+                                    })}
+                                </select>
+                            </div>
 
-                        <div className="total-price">
-                            {currency}
-                            {(
-                                convert(item.price).toFixed(2) * item.quantity
-                            ).toLocaleString("en-IN")}
+                            <div className="total-price">
+                                {currency}{" "}
+                                {(
+                                    convert(item.product.discountedPrice) *
+                                    item.quantity
+                                ).toLocaleString("en-IN")}
+                            </div>
                         </div>
-                    </div>
-                ))}
+                    );
+                })}
 
                 <div className="item-count">
                     <b>{cartItems.length} Items</b>
@@ -195,15 +183,19 @@ console.log("Cart Store Cart:", cart);
                     <div className="summary-row total-row">
                         <span>Estimated Total</span>
                         <span>
-                            {currency} {totalAmount.toLocaleString("en-IN")}
+                            {currency}{" "}
+                            {/* {totalAmount.toLocaleString("en-IN")} */}
                         </span>
                     </div>
 
-                    <button className="checkout-button">Checkout</button>
+                    <button className="checkout-button">
+                        Checkout
+                    </button>
                 </div>
             </div>
         </div>
     );
+
 }
 
 export default Cart;
