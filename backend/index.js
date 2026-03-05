@@ -1,8 +1,8 @@
 import "dotenv/config";
 import express from "express";
 import connectToDB from "./config/db.js";
-import productRouter from "./routes/ProductRouter.js";
-import authRouter from "./routes/AuthRouter.js";
+import productRouter from "./routes/StoreFrontRoutes/ProductRouter.js";
+import authRouter from "./routes/StoreFrontRoutes/AuthRouter.js";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 
@@ -24,8 +24,11 @@ app.use("/uploads", express.static("uploads"));
 // Connect to Mongo Database
 await connectToDB();
 
-//Redirect to Product Routes
+//STORE FRONT ROUTES
 app.use("/products", productRouter);
 app.use("/auth", authRouter);
+
+// ADMIN ROUTES
+// app.use("/admin/auth", adminAuthRouter);
 
 app.listen(process.env.PORT, () => { console.log(`Server is running on port ${process.env.PORT}`); });

@@ -1,6 +1,6 @@
 
 import { Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
-import "../../assets/css/footer.css"; // ✅ correct CSS path
+import "../assets/css/footer.css"; // ✅ correct CSS path
 
 export default function Footer() {
   return (

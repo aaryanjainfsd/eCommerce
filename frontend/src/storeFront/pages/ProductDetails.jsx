@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { NavLink, useParams } from "react-router-dom";
 import instance from "../../shared/config/axiosConfig";
 import { useCurrency } from "../contexts/CurrencyProvider";
-import "../../assets/css/productDetail.css";
+import "../assets/css/productDetail.css";
 
 // import { useCart } from "../contexts/CartProvider";
 

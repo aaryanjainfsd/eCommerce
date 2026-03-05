@@ -1,5 +1,5 @@
 import { useState } from "react";
-import "../../assets/css/register.css";
+import "../assets/css/register.css";
 import { Link, useNavigate } from "react-router-dom";
 
 import { useFirebase } from "../contexts/FirebaseProvider";

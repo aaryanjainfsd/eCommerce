@@ -1,7 +1,7 @@
 import axios from "axios";
 import { useState, useEffect } from "react";
 import instance from "../../shared/config/axiosConfig";
-import styles from "../../assets/css/allproducts.module.css";
+import styles from "../assets/css/allproducts.module.css";
 import { useCurrency } from "../contexts/CurrencyProvider";
 
 function First() {

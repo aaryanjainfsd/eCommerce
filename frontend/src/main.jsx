@@ -2,8 +2,8 @@
 import { createRoot } from 'react-dom/client'
 
 // Import Files
-import './assets/css/main.css'
-import AppRoutes from "./routes/AppRoutes";
+// import './assets/css/main.css'
+import AppRoutes from "./shared/routes/AppRoutes";
 
 // Render Application
 createRoot(document.getElementById('root')).render(<AppRoutes />);

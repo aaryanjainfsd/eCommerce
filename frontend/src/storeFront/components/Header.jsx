@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import "../../assets/css/header.css";
+import "../assets/css/header.css";
 import { useAuth } from "../contexts/AuthProvider";
 import { useCart } from "../contexts/CartProvider";
 import { useFirebase } from "../contexts/FirebaseProvider";

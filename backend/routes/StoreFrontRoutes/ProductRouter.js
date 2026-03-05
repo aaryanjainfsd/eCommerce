@@ -1,11 +1,14 @@
 import Router from 'express';
-import parseMultipart from "../middleware/parseMultipart.js";
-import uploadLocal from '../middleware/uploadLocal.js';
-import uploadCloud from '../middleware/uploadCloud.js'; // memory for cloud
-import validateNewProduct from "../middleware/validateNewProduct.js";
+import parseMultipart from "../../middleware/parseMultipart.js";
+import uploadLocal from '../../middleware/uploadLocal.js';
+import uploadCloud from '../../middleware/uploadCloud.js'; // memory for cloud
+import validateNewProduct from "../../middleware/validateNewProduct.js";
 
+import uploadCloud from '../../middleware/StoreFrontMiddleware/delete.js'; // memory for cloud
+import uploadCloud from '../../middleware/AdminMiddleware/delete.js'; // memory for cloud
+import uploadCloud from '../../middleware/SharedFrontMiddleware/delete.js'; // memory for cloud
 
-import { addProduct, deleteProduct, getProducts, updateProduct, getSingleProduct } from '../controllers/ProductController.js';
+import { addProduct, deleteProduct, getProducts, updateProduct, getSingleProduct } from '../../controllers/ProductController.js';
 
 
 const useLocal = true;

@@ -10,8 +10,6 @@ import Checkout from "../../storeFront/pages/Checkout";
 import Register from "../../storeFront/pages/Register";
 import AllProducts from "../../storeFront/pages/AllProducts";
 import ProductDetails from "../../storeFront/pages/ProductDetails";
-import Dice from "../../storeFront/pages/DiceGame";
-import ItemShiftTask from "../../storeFront/pages/ItemShiftTask";
 
 // ==================== STOREFRONT COMPONENTS ====================
 import OutletComponent from "../../storeFront/components/OutletComponent";
@@ -62,8 +60,6 @@ const router = createBrowserRouter([
 		element: <AdminOutlet />,
 		children:  adminChildren
 	},
-
-
 ]);
 
 function AppRoutes() {

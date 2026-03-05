@@ -1,4 +1,4 @@
-import "../../assets/css/cart.css";
+import "../assets/css/cart.css";
 import { NavLink } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
 
@@ -30,7 +30,6 @@ function Cart() {
         }
     }, [cart]);
 
-    
     async function getCartProducts() {
         if (!hasLoadedOnce.current) {
 			setLoading(true);
@@ -62,9 +61,6 @@ function Cart() {
 
     }
 
-
-
-
     function handleQuantityChange(productId, newQty) {
         if (newQty >= 1) {
             setQty(productId, newQty);
@@ -73,12 +69,6 @@ function Cart() {
             setQty(productId, 1);
         }
     }
-
-
-
-
-
-
 
     if (cartItems.length === 0) {
         return (

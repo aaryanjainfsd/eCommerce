@@ -1,6 +1,5 @@
 
-import profileImg from "../../assets/react.svg";
-import "../../assets/css/aboutus.css"; // ✅ correct CSS path
+import "../assets/css/aboutus.css"; // ✅ correct CSS path
 
 export default function AboutUs() {
   return (
