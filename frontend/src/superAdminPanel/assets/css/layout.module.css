@@ -1,0 +1,60 @@
+.shell {
+  min-height: 100vh;
+  display: flex;
+  background: linear-gradient(180deg, #eef5f4 0%, #f7fbfa 100%);
+  width: 100%;
+}
+
+.mainPanel {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  margin-left: 292px;
+  min-height: 100vh;
+  position: relative;
+}
+
+.outletWrap {
+  flex: 1;
+  padding: 22px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  margin-top: 62px;
+}
+
+/* Header fixed positioning */
+.mainPanel > header {
+  position: fixed;
+  top: 0;
+  left: 292px;
+  right: 0;
+  z-index: 999;
+  width: calc(100% - 292px);
+}
+
+/* Collapsed sidebar adjustments */
+.mainPanel.withCollapsedSidebar {
+  margin-left: 96px;
+}
+
+.mainPanel.withCollapsedSidebar > header {
+  left: 96px;
+  width: calc(100% - 96px);
+}
+
+@media (max-width: 900px) {
+  .mainPanel {
+    margin-left: 0;
+  }
+
+  .mainPanel > header {
+    left: 0;
+    width: 100%;
+  }
+
+  .outletWrap {
+    padding: 16px;
+    margin-top: 62px;
+  }
+}

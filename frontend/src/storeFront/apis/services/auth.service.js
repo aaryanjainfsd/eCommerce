@@ -5,6 +5,7 @@ export async function registerUserService(userData) {
     {
 		const response = await axiosInstance.post("/auth/register", userData);
 		return response.data;
+        
 	}
     catch (error) 
     {

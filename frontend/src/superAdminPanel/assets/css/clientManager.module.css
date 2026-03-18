@@ -1,0 +1,217 @@
+/* ─── Page Layout ─────────────────────────────────── */
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ─── Card ─────────────────────────────────────────── */
+.card {
+  background: #ffffff;
+  border: 1px solid #cfe0db;
+  border-radius: 16px;
+  padding: 24px 28px;
+  box-shadow: 0 4px 24px rgba(18, 56, 71, 0.07);
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 22px;
+}
+
+.title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #0f3040;
+}
+
+/* ─── Form Shell ────────────────────────────────────── */
+.form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+  align-items: start;
+}
+
+/* ─── Section (fieldset) ────────────────────────────── */
+.formSection {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  border: 1.5px solid #d4eae5;
+  border-radius: 12px;
+  padding: 20px 20px 18px;
+  margin: 0;
+  background: #f7fbfa;
+}
+
+/* Legend styled as a clean pill label */
+.sectionTitle {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #0f8570;
+  background: #f7fbfa;
+  padding: 0 10px;
+}
+
+/* ─── Two-column row ────────────────────────────────── */
+.fieldGroup {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+
+/* ─── Individual Field ──────────────────────────────── */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #2d6675;
+  letter-spacing: 0.01em;
+}
+
+/* ─── Inputs & Selects ──────────────────────────────── */
+.field input,
+.field select {
+  border: 1.5px solid #c5dcd7;
+  border-radius: 8px;
+  height: 40px;
+  padding: 0 12px;
+  outline: none;
+  color: #0f3040;
+  background: #ffffff;
+  font-size: 0.91rem;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.field input::placeholder {
+  color: #a8c4c0;
+  font-weight: 400;
+}
+
+.field input:focus,
+.field select:focus {
+  border-color: #159a81;
+  box-shadow: 0 0 0 3px rgba(21, 154, 129, 0.12);
+}
+
+/* ─── Submit Button ─────────────────────────────────── */
+.primaryButton {
+  grid-column: 1 / -1;
+  align-self: stretch;
+  background: linear-gradient(135deg, #1cb89a 0%, #0d7a65 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  height: 44px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.03em;
+  transition: opacity 0.15s;
+}
+
+.primaryButton:hover {
+  opacity: 0.88;
+}
+
+/* ─── Ghost / Cancel Button ─────────────────────────── */
+.ghostButton {
+  background: #e8f4f1;
+  color: #185464;
+  border: none;
+  border-radius: 8px;
+  height: 34px;
+  padding: 0 14px;
+  font-size: 0.83rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* ─── Table ─────────────────────────────────────────── */
+.tableWrap {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th,
+.table td {
+  text-align: left;
+  padding: 12px 10px;
+  border-bottom: 1px solid #e0ece8;
+}
+
+.table th {
+  color: #5e7f89;
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.table td {
+  color: #173a45;
+  font-size: 0.91rem;
+}
+
+.emptyState {
+  text-align: center !important;
+  color: #7a9fab !important;
+  padding: 28px 8px !important;
+  font-size: 0.88rem;
+}
+
+/* ─── Table Action Buttons ──────────────────────────── */
+.actionRow {
+  display: inline-flex;
+  gap: 8px;
+}
+
+.editButton,
+.deleteButton {
+  border: none;
+  border-radius: 7px;
+  height: 30px;
+  padding: 0 12px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.editButton {
+  background: #dff0eb;
+  color: #0a6e5a;
+}
+
+.deleteButton {
+  background: #fde8e8;
+  color: #b33a3a;
+}
+
+/* ─── Responsive ────────────────────────────────────── */
+@media (max-width: 680px) {
+  .card {
+    padding: 18px 16px;
+  }
+
+  .form {
+    grid-template-columns: 1fr;
+  }
+
+  .fieldGroup {
+    grid-template-columns: 1fr;
+  }
+}

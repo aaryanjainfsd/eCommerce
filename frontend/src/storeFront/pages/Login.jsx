@@ -1,12 +1,9 @@
 import { useState } from "react";
-import { app } from "../firebase";
 import "../assets/css/login.css";
 import { Link, useNavigate } from "react-router-dom";
 import { useFirebase } from "../contexts/FirebaseProvider";
-import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { loginUserService } from "../apis/services/auth.service";
 
-const auth = getAuth(app);
 
 function Login() {
     const firebaseContext = useFirebase();
@@ -171,12 +168,7 @@ function Login() {
                                 />
                             </div>
 
-                            <button
-                                type="submit"
-                                className={`btn primary-btn ${
-                                    isSubmitting ? "inProcess" : ""
-                                }`}
-                            >
+                            <button type="submit" className={`btn primary-btn ${ isSubmitting ? "inProcess" : "" }`} >
                                 {" "}
                                 {isSubmitting ? "Logging in..." : "Login"}{" "}
                             </button>

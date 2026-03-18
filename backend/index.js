@@ -1,10 +1,27 @@
 import "dotenv/config";
-import express from "express";
-import connectToDB from "./config/db.js";
-import productRouter from "./routes/StoreFrontRoutes/ProductRouter.js";
-import authRouter from "./routes/StoreFrontRoutes/AuthRouter.js";
 import cors from "cors";
+import express from "express";
 import cookieParser from "cookie-parser";
+
+
+// DB Connection 
+import connectToDB from "./src/shared/config/db.js";
+import ClientRouter from "./src/shared/routes/ClientRouter.js";
+
+// --------------------------- STOREFRONT ROUTES --------------------------------------------
+import authRouter from "./src/storeFront/routes/AuthRouter.js";
+import productRouter from "./src/storeFront/routes/ProductRouter.js";
+// ------------------------------------------------------------------------------------------
+
+
+//----------------------------- ADMIN ROUTES -------------------------------------------------
+import AdminAuthRouter from "./src/adminPanel/routes/AdminAuthRouter.js";
+// -------------------------------------------------------------------------------------------
+
+
+//----------------------------- SUPER ADMIN ROUTES -------------------------------------------
+import SuperAdminAuthRouter from "./src/superAdminPanel/routes/SuperAdminAuthRouter.js";
+// -------------------------------------------------------------------------------------------
 
 
 
@@ -18,17 +35,29 @@ app.use(cors({
 	credentials: true
 }));
 
-// ✅ ADD THIS LINE HERE
 app.use("/uploads", express.static("uploads"));
 
 // Connect to Mongo Database
 await connectToDB();
 
-//STORE FRONT ROUTES
-app.use("/products", productRouter);
-app.use("/auth", authRouter);
 
-// ADMIN ROUTES
-// app.use("/admin/auth", adminAuthRouter);
 
+// --------------------------- STOREFRONT ROUTES --------------------------------------------
+app.use("/storefront/products", productRouter);
+app.use("/storefront/auth", authRouter);
+// ------------------------------------------------------------------------------------------
+
+
+//----------------------------- ADMIN ROUTES -------------------------------------------------
+app.use("/admin/auth", AdminAuthRouter);
+app.use("/admin/clients", ClientRouter);
+// -------------------------------------------------------------------------------------------
+
+
+//----------------------------- SUPER ADMIN ROUTES -------------------------------------------
+app.use("/superAdmin/auth", SuperAdminAuthRouter);
+app.use("/superAdmin/clients", ClientRouter);
+// -------------------------------------------------------------------------------------------
+
+// Starting the server
 app.listen(process.env.PORT, () => { console.log(`Server is running on port ${process.env.PORT}`); });

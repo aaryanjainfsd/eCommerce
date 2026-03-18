@@ -1,7 +1,9 @@
 // ==================== REACT & ROUTING ====================
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
-// ==================== STOREFRONT PAGES ====================
+// ==================== STOREFRONT IMPORTS ====================
+import OutletComponent from "../../storeFront/components/OutletComponent";
+
 import Home from "../../storeFront/pages/Home";
 import Cart from "../../storeFront/pages/Cart";
 import Login from "../../storeFront/pages/Login";
@@ -11,41 +13,52 @@ import Register from "../../storeFront/pages/Register";
 import AllProducts from "../../storeFront/pages/AllProducts";
 import ProductDetails from "../../storeFront/pages/ProductDetails";
 
-// ==================== STOREFRONT COMPONENTS ====================
-import OutletComponent from "../../storeFront/components/OutletComponent";
 
-// ==================== ADMIN PAGES ====================
-import AdminLogin from "../../adminPanel/pages/AdminLogin";
-
-// ==================== ADMIN COMPONENTS ====================
+// ==================== ADMIN IMPORTS ====================
 import AdminOutlet from "../../adminPanel/components/AdminOutlet";
 
-// ==================== ROUTE PROTECTION ====================
+import AdminLogin from "../../adminPanel/pages/AdminLogin";
+import Dashboard from "../../adminPanel/pages/Dashboard";
+
+// ==================== SUPER ADMIN IMPORTS ====================
+import SuperAdminPanelOutlet from "../../superAdminPanel/components/SuperAdminPanelOutlet.jsx";
+
+import SuperClients from "../../superAdminPanel/pages/SuperClients";
+import SuperAdminLogin from "../../superAdminPanel/pages/SuperAdminLogin.jsx";
+
+
+// ==================== PROTECTED ROUTES ====================
 import ProtectedRoute from "./ProtectedRoute";
+import AdminProtectedRoute from "./AdminProtectedRoute";
+import SuperAdminProtectedRoute from "./SuperAdminProtectedRoute.jsx";
 
 // ==================== CONTEXT PROVIDERS ====================
 import FirebaseProvider from "../../storeFront/contexts/FirebaseProvider";
-import CartProvider from "../../storeFront/contexts/CartProvider";
 import CurrencyProvider from "../../storeFront/contexts/CurrencyProvider";
 
 
 
-const storeFrontChildren = [
+const storeFrontChildren = [ 
     { index : true, element: <Home /> },
-    { path: "/cart", element: <Cart /> },
-    { path: "/login", element: <Login /> },
-    { path: "/aboutus", element: <AboutUs /> },
-    { path: "/register", element: <Register /> },
-    { path: "/allproducts", element: <AllProducts /> },
-    { path: "/product-details/:id", element: <ProductDetails /> },
-    { path: "/checkout", element: (<ProtectedRoute> <Checkout/> </ProtectedRoute>)},
+    { path: "cart", element: <Cart /> },
+    { path: "login", element: <Login /> },
+    { path: "aboutus", element: <AboutUs /> },
+    { path: "register", element: <Register /> },
+    { path: "allproducts", element: <AllProducts /> },
+    { path: "product-details/:id", element: <ProductDetails /> },
+    { path: "checkout", element: (<ProtectedRoute> <Checkout/> </ProtectedRoute>)},
 ];
 
 const adminChildren = [
     { index: true, element: <AdminLogin />},
-    // { path: "login", element: <AdminLogin /> },
-
+    { path: "dashboard", element: ( <AdminProtectedRoute> <Dashboard /> </AdminProtectedRoute>),},
 ];
+
+const superAdminPanelChildren = [
+    { index: true, element: <SuperAdminLogin />},
+    { path: "clients", element: (<SuperAdminProtectedRoute> <SuperClients /> </SuperAdminProtectedRoute>)},
+];
+
 
 const router = createBrowserRouter([
     // ================= STORE FRONT =================
@@ -56,19 +69,22 @@ const router = createBrowserRouter([
     },
     // ================= ADMIN PANEL =================
 	{
-		path: "/admin",
+		path: "/adminPanel",
 		element: <AdminOutlet />,
 		children:  adminChildren
 	},
+    {
+        path: "/superAdminPanel",
+        element: <SuperAdminPanelOutlet />,
+        children:  superAdminPanelChildren
+    }
 ]);
 
 function AppRoutes() {
     return (
         <FirebaseProvider>
             <CurrencyProvider>
-                    <CartProvider>
                         <RouterProvider router={router} />
-                    </CartProvider>
             </CurrencyProvider>
         </FirebaseProvider>
     );

@@ -1,0 +1,46 @@
+.footer {
+  margin-top: 24px;
+  padding: 18px 24px;
+  border-top: 1px solid #d8e4e2;
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  align-items: center;
+  color: #33515b;
+  background: #f6faf9;
+}
+
+.title {
+  display: block;
+  margin: 0 0 4px;
+  font-weight: 700;
+  color: #173a45;
+}
+
+.caption {
+  font-size: 0.92rem;
+  color: #62818a;
+}
+
+.nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.navLink {
+  color: #1f5664;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.navLink:hover {
+  color: #159a81;
+}
+
+@media (max-width: 720px) {
+  .footer {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
