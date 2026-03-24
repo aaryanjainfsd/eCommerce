@@ -1,11 +1,12 @@
 import { Router } from "express";
-import { createClient, getClients } from "../controllers/ClientController.js";
+import { createClient, createClientWithCredentials, getAllClients } from "../controllers/ClientController.js";
 
 const clientRouter = Router();
 
 // Define your client routes here
 clientRouter.post("/addClient", createClient);
-clientRouter.get("/getClients", getClients);
+clientRouter.post("/addClientWithCredentials", createClientWithCredentials);
+clientRouter.get("/getAllClients", getAllClients);
 
 
 export default clientRouter;

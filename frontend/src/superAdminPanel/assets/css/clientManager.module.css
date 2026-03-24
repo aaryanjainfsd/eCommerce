@@ -105,6 +105,14 @@
   box-shadow: 0 0 0 3px rgba(21, 154, 129, 0.12);
 }
 
+.field input:disabled,
+.field select:disabled {
+  background: #eef3f2;
+  border-color: #d4dfdc;
+  color: #7a9097;
+  cursor: not-allowed;
+}
+
 /* ─── Submit Button ─────────────────────────────────── */
 .primaryButton {
   grid-column: 1 / -1;

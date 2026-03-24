@@ -8,10 +8,10 @@ const authSchema = new Schema({
 	email: { type: String, required: true, unique: true },
 	password: { type: String, required: true },
 	role: { type: String, default: "customers" },
-	avatar: { type: String, default: "deafult.jpg" }
+	avatar: { type: String, default: "default.jpg" }
 }, { timestamps: true });
 
-const AuthModel = model("auth-model", authSchema);
+const AuthModel = model("users", authSchema);
 
 export default AuthModel;
  

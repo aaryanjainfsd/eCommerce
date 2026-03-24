@@ -8,19 +8,24 @@ import productRouter from "../../storeFront/routes/ProductRouter.js";
 
 export async function registerFunction(req, res) {
     try {
-        const { username, password, clientId } = req.body;
+        const { username, password, clientId, client_id } = req.body;
+        const normalizedClientId = clientId || client_id;
         const futureSampleID = `sample_${Date.now()}`;
 
         if (!username || !password) {
             return res.status(400).json({ message: "Username and password are required" });
         }
 
-        if (clientId) {
-            if (!isValidObjectId(clientId)) {
+        if (!normalizedClientId) {
+            return res.status(400).json({ message: "clientId is required" });
+        }
+
+        if (normalizedClientId) {
+            if (!isValidObjectId(normalizedClientId)) {
                 return res.status(400).json({ message: "Invalid clientId" });
             }
 
-            const clientExists = await ClientModel.findById(clientId);
+            const clientExists = await ClientModel.findById(normalizedClientId);
             if (!clientExists) {
                 return res.status(404).json({ message: "Client not found for given clientId" });
             }
@@ -36,7 +41,7 @@ export async function registerFunction(req, res) {
 
             const newAdmin = await AdminAuthModel.create({
                 foreignKeys: {
-                    clientID: clientId,
+                    clientID: normalizedClientId,
                     futureSampleID: futureSampleID
                 },
                 data: {

@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { addClient,addClientCredentials } from "../../shared/apis/services/client.service.jsx";
+import { useEffect, useState } from "react";
+import { addClient, adminAuthCredentials, getAllClients } from "../../shared/apis/services/client.service.jsx";
 import styles from "../assets/css/clientManager.module.css";
 
 const emptyForm = {
@@ -9,24 +9,78 @@ const emptyForm = {
     email: "",
     phone: "",
     status: "Active", // pre-select "Active" so the dropdown already has a value
+    category: "starter",
     username: "",
     password: "",
+};
+
+const categoryLabelMap = {
+    starter: "Starter Plan",
+    premium: "Premium Plan",
+    luxury: "Luxury Plan",
 };
 
 function SuperClients() {
 
     const [formData, setFormData] = useState(emptyForm); // start with a blank form
     const [clients,  setClients]  = useState([]);         // start with an empty list
+    const [isLoadingClients, setIsLoadingClients] = useState(false);
+    const [clientsError, setClientsError] = useState("");
+
+    async function fetchClientsFromDatabase()
+    {
+        try
+        {
+            setIsLoadingClients(true);
+            setClientsError("");
+            const response = await getAllClients();
+            setClients(response.data || []);
+        }
+        catch (error)
+        {
+            const errorMessage = error?.message || "Failed to load clients.";
+            setClientsError(errorMessage);
+        }
+        finally
+        {
+            setIsLoadingClients(false);
+        }
+    }
+
+    useEffect(() => {
+        fetchClientsFromDatabase();
+    }, []);
+
+    function getCategoryLabel(category)
+    {
+        return categoryLabelMap[category] || category || "-";
+    }
 
     function handleInputChange(event) {
 
         const fieldName  = event.target.name;   // e.g. "email"    (which field changed?)
-        const fieldValue = event.target.value;  // e.g. "john@..." (what did user type?)
+        let fieldValue = event.target.value;  // e.g. "john@..." (what did user type?)
 
-        setFormData((previousValue) => ({
-            ...previousValue,           // keep all other fields exactly the same
-            [fieldName]: fieldValue,    // update only the field that just changed
-        }));
+        if (fieldName === "phone") {
+            fieldValue = fieldValue.replace(/\D/g, "");
+        }
+
+        setFormData((previousValue) => {
+            const updatedValue = {
+                ...previousValue,
+                [fieldName]: fieldValue,
+            };
+
+            if (fieldName === "businessName") {
+                updatedValue.username = fieldValue;
+            }
+
+            if (fieldName === "phone") {
+                updatedValue.password = fieldValue;
+            }
+
+            return updatedValue;
+        });
     }
 
     function resetForm() 
@@ -37,33 +91,44 @@ function SuperClients() {
     async function handleSubmit(event) 
     {
         event.preventDefault();
-        const clientPayload = {
-            clientName: formData.clientName,
-            businessName: formData.businessName,
-            websiteURL: formData.websiteURL,
-            email: formData.email,
-            phone: formData.phone,
-            status: formData.status,
-            category: formData.category
-        };
-        const addClientResponse = await addClient(clientPayload);
-        
-        const loginPayload = {
-            clientId: addClientResponse.data._id, // use the real client ID returned from the backend
-            username: formData.username,
-            password: formData.password,
-        };
-        const addClientCredentialsResponse = await addClientCredentials(loginPayload);
-        resetForm(); // clear the form so the user can add another client
+
+        try
+        {
+            const autoUsername = formData.businessName;
+            const autoPassword = formData.phone;
+
+            const clientPayload = {
+                clientName: formData.clientName,
+                businessName: formData.businessName,
+                websiteURL: formData.websiteURL,
+                email: formData.email,
+                phone: formData.phone,
+                status: formData.status,
+                category: formData.category
+            };
+            const addClientResponse = await addClient(clientPayload);
+
+            console.log("Client added successfully:", addClientResponse.data);
+            
+            const loginPayload = {
+                clientId: addClientResponse.data._id, // use the real client ID returned from the backend
+                username: autoUsername,
+                password: autoPassword,
+            };
+            const adminAuthResponse = await adminAuthCredentials(loginPayload);
+            console.log("Admin auth credentials added successfully:", adminAuthResponse.data);
+
+            resetForm(); // clear the form so the user can add another client
+            fetchClientsFromDatabase(); // refresh table with latest DB state
+        }
+        catch (error)
+        {
+            console.error("Failed to add client:", error);
+        }
     }
 
-    function getClientIdentifier(client) {
-        return client._id || client.id || client.email;
-    }
 
-    function handleDeleteClient(clientId) {
-        setClients((previousClients) => previousClients.filter((client) => getClientIdentifier(client) !== clientId));
-    }
+
 
     return (
         <section className={styles.page}>
@@ -80,39 +145,18 @@ function SuperClients() {
                         <div className={styles.fieldGroup}>
                             <label className={styles.field}>
                                 <span className={styles.label}>Client Name *</span>
-                                <input
-                                    type="text"
-                                    name="clientName"
-                                    value={formData.clientName}
-                                    onChange={handleInputChange}
-                                    placeholder="John Doe"
-                                    required
-                                />
+                                <input type="text" name="clientName" value={formData.clientName} onChange={handleInputChange} placeholder="John Doe" required />
                             </label>
 
                             <label className={styles.field}>
                                 <span className={styles.label}>Business Name *</span>
-                                <input
-                                    type="text"
-                                    name="businessName"
-                                    value={formData.businessName}
-                                    onChange={handleInputChange}
-                                    placeholder="ABC Corp"
-                                    required
-                                />
+                                <input type="text" name="businessName" value={formData.businessName} onChange={handleInputChange} placeholder="ABC Corp" required />
                             </label>
                         </div>
 
                         <label className={styles.field}>
                             <span className={styles.label}>Website URL *</span>
-                            <input
-                                type="text"
-                                name="websiteURL"
-                                value={formData.websiteURL}
-                                onChange={handleInputChange}
-                                placeholder="https://example.com"
-                                required
-                            />
+                            <input type="text" name="websiteURL" value={formData.websiteURL} onChange={handleInputChange} placeholder="https://example.com" required />
                         </label>
 
                         <div className={styles.fieldGroup}>
@@ -131,11 +175,12 @@ function SuperClients() {
                             <label className={styles.field}>
                                 <span className={styles.label}>Phone *</span>
                                 <input
-                                    type="text"
+                                    type="number"
                                     name="phone"
                                     value={formData.phone}
                                     onChange={handleInputChange}
-                                    placeholder="+1 (555) 123-4567"
+                                    inputMode="numeric"
+                                    placeholder="9876543210"
                                     required
                                 />
                             </label>
@@ -171,7 +216,7 @@ function SuperClients() {
                                     type="text"
                                     name="username"
                                     value={formData.username}
-                                    onChange={handleInputChange}
+                                    disabled
                                     placeholder="Enter username"
                                     required
                                 />
@@ -179,7 +224,7 @@ function SuperClients() {
 
                             <label className={styles.field}>
                                 <span className={styles.label}>Password *</span>
-                                <input type="password" name="password" value={formData.password} onChange={handleInputChange} placeholder="Enter password" required />
+                                <input type="password" name="password" value={formData.password} disabled placeholder="Enter password" required />
                             </label>
                         
                     </fieldset>
@@ -193,49 +238,44 @@ function SuperClients() {
             <div className={styles.card}>
                 <h2 className={styles.title}>Added Clients</h2>
 
+                {clientsError && <p className={styles.emptyState}>{clientsError}</p>}
+                {isLoadingClients && <p className={styles.emptyState}>Loading clients...</p>}
+
                 <div className={styles.tableWrap}>
                     <table className={styles.table}>
                         <thead>
                             <tr>
                                 <th>Client Name</th>
                                 <th>Business Name</th>
-                                <th>Email</th>
                                 <th>Phone</th>
+                                <th>Username</th>
+                                <th>Password</th>
                                 <th>Status</th>
-                                <th>Role</th>
+                                <th>Category</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {clients.length === 0 ? (
                                 <tr>
-                                    <td colSpan="6" className={styles.emptyState}>
+                                    <td colSpan="8" className={styles.emptyState}>
                                         No clients added yet.
                                     </td>
                                 </tr>
                             ) : (
-                                clients.map((client) => (
-                                    <tr key={getClientIdentifier(client)}>
+                                clients.map((client, index) => (
+                                    <tr key={client._id || client.id || client.email || index}>
                                         <td>{client.clientName}</td>
                                         <td>{client.businessName}</td>
-                                        <td>{client.email}</td>
                                         <td>{client.phone}</td>
+                                        <td>{client.username || "-"}</td>
+                                        <td>{client.passwordDisplay || "-"}</td>
                                         <td>{client.status}</td>
+                                        <td>{getCategoryLabel(client.category)}</td>
                                         <td>
                                             <div className={styles.actionRow}>
-                                                <button
-                                                    type="button"
-                                                    className={styles.editButton}
-                                                >
-                                                    Edit
-                                                </button>
-                                                <button
-                                                    type="button"
-                                                    className={styles.deleteButton}
-                                                    onClick={() => handleDeleteClient(getClientIdentifier(client))}
-                                                >
-                                                    Remove
-                                                </button>
+                                                <button type="button" className={styles.editButton} > Edit </button>
+                                                <button type="button" className={styles.deleteButton} > Remove </button>
                                             </div>
                                         </td>
                                     </tr>

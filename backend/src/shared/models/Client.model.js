@@ -8,8 +8,8 @@ const clientSchema = new Schema(
         websiteURL      : { type: String },
         email           : { type: String, required: true, unique: true },
         phone           : { type: String, required: true },
-        status          : { type: String, default: "Active" },
-        role            : { type: String, default: "client" }
+        status          : { type: String },
+        category        : { type: String }
     },
     {
         timestamps: true

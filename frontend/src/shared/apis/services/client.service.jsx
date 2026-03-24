@@ -13,7 +13,21 @@ export async function addClient(clientData)
     }
 }
 
-export async function addClientCredentials(loginData)
+export async function getAllClients()
+{
+    try
+    {
+        const response = await axiosInstance.get("admin/clients/getAllClients", { withCredentials: true });
+        return response;
+    }
+    catch(error)
+    {
+        throw error.response?.data || error;
+    }
+
+}
+
+export async function adminAuthCredentials(loginData)
 {
     try
     {

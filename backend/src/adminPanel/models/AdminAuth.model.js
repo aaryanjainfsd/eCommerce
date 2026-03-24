@@ -18,13 +18,13 @@ import {Schema, model } from "mongoose";
 const adminAuthSchema = new Schema(
     {
         foreignKeys: {
-            clientID: {
+            client_id: {
                 type: Schema.Types.ObjectId,
                 ref: "client",
                 required: true,
                 unique: true
             },
-            futureSampleID: { type: String, required: true, trim: true }
+            future_sample_id: { type: String, required: true, trim: true }
         },
         data: {
             username: { type: String, required: true, unique: true },
@@ -33,12 +33,12 @@ const adminAuthSchema = new Schema(
     },
     {
         timestamps: true,
-        collection: "admin_auth_model"
+        collection: "admin_auth_credentials"
     }
 );
 
 
 
-const AdminAuthModel = model("AdminAuth", adminAuthSchema);
+const AdminAuthModel = model("admin_auth_credentials", adminAuthSchema);
 
 export default AdminAuthModel;
