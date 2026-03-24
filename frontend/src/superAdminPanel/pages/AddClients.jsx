@@ -111,7 +111,7 @@ function SuperClients() {
             console.log("Client added successfully:", addClientResponse.data);
             
             const loginPayload = {
-                clientId: addClientResponse.data._id, // use the real client ID returned from the backend
+                client_id: addClientResponse.data._id, // use the real client ID returned from the backend
                 username: autoUsername,
                 password: autoPassword,
             };

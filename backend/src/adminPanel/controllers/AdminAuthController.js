@@ -8,27 +8,24 @@ import productRouter from "../../storeFront/routes/ProductRouter.js";
 
 export async function registerFunction(req, res) {
     try {
-        const { username, password, clientId, client_id } = req.body;
-        const normalizedClientId = clientId || client_id;
-        const futureSampleID = `sample_${Date.now()}`;
+        const { username, password, client_id } = req.body;
+        const futureSampleId = `sample_${Date.now()}`;
 
         if (!username || !password) {
             return res.status(400).json({ message: "Username and password are required" });
         }
 
-        if (!normalizedClientId) {
-            return res.status(400).json({ message: "clientId is required" });
+        if (!client_id) {
+            return res.status(400).json({ message: "client_id is required" });
         }
 
-        if (normalizedClientId) {
-            if (!isValidObjectId(normalizedClientId)) {
-                return res.status(400).json({ message: "Invalid clientId" });
-            }
+        if (!isValidObjectId(client_id)) {
+            return res.status(400).json({ message: "Invalid client_id" });
+        }
 
-            const clientExists = await ClientModel.findById(normalizedClientId);
-            if (!clientExists) {
-                return res.status(404).json({ message: "Client not found for given clientId" });
-            }
+        const clientExists = await ClientModel.findById(client_id);
+        if (!clientExists) {
+            return res.status(404).json({ message: "Client not found for given client_id" });
         }
 
         const existing = await AdminAuthModel.findOne({ "data.username": username });
@@ -41,8 +38,8 @@ export async function registerFunction(req, res) {
 
             const newAdmin = await AdminAuthModel.create({
                 foreignKeys: {
-                    clientID: normalizedClientId,
-                    futureSampleID: futureSampleID
+                    client_id: client_id,
+                    future_sample_id: futureSampleId
                 },
                 data: {
                     username: username,
