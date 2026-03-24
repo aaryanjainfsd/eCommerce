@@ -11,7 +11,7 @@ import styles from "../assets/css/superAdminLogin.module.css";
 import { SuperAdminLoginAPI } from "../api/services/superAdminAuth.jsx";
 
 // ZUSTAND STORE IMPORT 
-import useSuperAdminAuthStore from "../stores/SuperAdminAuthStore";
+import useSuperAdminAuthStore from "../stores/SuperAdminAuthStore.jsx";
 
 
 

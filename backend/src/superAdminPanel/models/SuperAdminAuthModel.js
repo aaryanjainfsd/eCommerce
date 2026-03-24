@@ -10,10 +10,10 @@ const superAdminAuthSchema = new Schema(
     }, 
     { 
         timestamps: true,
-        collection: "super_admin_auth_model"
+        collection: "super_admin_credentials"
     }
 );
 
-const SuperAdminAuthModel = model("SuperAdminAuthModel", superAdminAuthSchema);
+const SuperAdminAuthModel = model("super_admin_credentials", superAdminAuthSchema);
 
 export default SuperAdminAuthModel;

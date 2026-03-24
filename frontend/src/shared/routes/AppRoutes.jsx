@@ -16,15 +16,14 @@ import ProductDetails from "../../storeFront/pages/ProductDetails";
 
 // ==================== ADMIN IMPORTS ====================
 import AdminOutlet from "../../adminPanel/components/AdminOutlet";
-
 import AdminLogin from "../../adminPanel/pages/AdminLogin";
 import Dashboard from "../../adminPanel/pages/Dashboard";
 
 // ==================== SUPER ADMIN IMPORTS ====================
 import SuperAdminPanelOutlet from "../../superAdminPanel/components/SuperAdminPanelOutlet.jsx";
 
-import SuperClients from "../../superAdminPanel/pages/SuperClients";
-import SuperAdminLogin from "../../superAdminPanel/pages/SuperAdminLogin.jsx";
+import SuperClients from "../../superAdminPanel/pages/AddClients.jsx";
+import SuperAdminLogin from "../../superAdminPanel/pages/Login.jsx";
 
 
 // ==================== PROTECTED ROUTES ====================

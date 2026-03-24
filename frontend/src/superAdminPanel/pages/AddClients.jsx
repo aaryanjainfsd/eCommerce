@@ -1,14 +1,7 @@
 import { useState } from "react";
+import { addClient,addClientCredentials } from "../../shared/apis/services/client.service.jsx";
 import styles from "../assets/css/clientManager.module.css";
 
-// ─────────────────────────────────────────────────────────────────────────────
-// STEP 1 — Define a blank form template
-//
-// This object holds the default (empty) value for every single form field.
-// We use it in two places:
-//   a) As the initial value when the component first loads (nothing typed yet)
-//   b) In resetForm() to wipe everything clean after a submit or cancel
-// ─────────────────────────────────────────────────────────────────────────────
 const emptyForm = {
     clientName: "",
     businessName: "",
@@ -22,38 +15,9 @@ const emptyForm = {
 
 function SuperClients() {
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // STEP 2 — Set up state variables
-    //
-    // State is React's way of remembering data while the page is open.
-    // Every time a state value changes, React automatically re-renders
-    // the part of the page that depends on it.
-    //
-    //  formData → holds every value the user has typed into the form fields
-    //  clients  → holds the list of all clients added so far
-    // ─────────────────────────────────────────────────────────────────────────
     const [formData, setFormData] = useState(emptyForm); // start with a blank form
     const [clients,  setClients]  = useState([]);         // start with an empty list
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // handleInputChange
-    //
-    // WHAT IT DOES:
-    //   Runs every time the user types in any input field or changes a select.
-    //   It reads which field changed and what the new value is, then updates
-    //   only that one field inside formData — all other fields stay the same.
-    //
-    // HOW IT WORKS — step by step:
-    //   1. The browser fires an "onChange" event on the input.
-    //   2. event.target is the actual <input> element that the user typed in.
-    //   3. Every <input> in our form has a "name" attribute (e.g. name="email").
-    //      That name matches the matching key inside formData exactly.
-    //   4. We read  event.target.name  → tells us WHICH field changed
-    //              event.target.value  → tells us WHAT the user typed
-    //   5. setFormData replaces the old formData with a new object where:
-    //        ...previousValue      → copies ALL existing fields as-is
-    //        [fieldName]: fieldValue → then overwrites only the one that changed
-    // ─────────────────────────────────────────────────────────────────────────
     function handleInputChange(event) {
 
         const fieldName  = event.target.name;   // e.g. "email"    (which field changed?)
@@ -65,72 +29,40 @@ function SuperClients() {
         }));
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // resetForm
-    //
-    // WHAT IT DOES:
-    //   Clears the entire form back to blank after a client is added.
-    //
-    // WHEN IS IT CALLED:
-    //   After a client is successfully added (inside handleSubmit)
-    // ─────────────────────────────────────────────────────────────────────────
-    function resetForm() {
-
-        // Replace whatever is in the form fields with the original blank values
+    function resetForm() 
+    {
         setFormData(emptyForm);
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // handleSubmit
-    //
-    // WHAT IT DOES:
-    //   Runs when the user clicks "Add Client".
-    //   Sends the form data to the backend to create a new client.
-    //
-    // ── HOW DATA IS SENT TO THE BACKEND (real app flow) ──────────────────────
-    //
-    //   We send a POST request to the backend with formData as the body.
-    //   The backend saves the data in the database and returns the new
-    //   client object (including the real database ID it was assigned).
-    //   We then add that returned client to our local clients list.
-    //
-    //   axios.post("/api/super-admin/clients", formData)
-    //
-    // ── FOR NOW (no backend connected yet) ───────────────────────────────────
-    //   We store everything in local React state only.
-    //   Data disappears on page refresh.
-    //   The TODO comment below marks exactly where to add the real API call.
-    // ─────────────────────────────────────────────────────────────────────────
-    async function handleSubmit(event) {
-
-        // Stop the browser from doing its default behaviour (refreshing the page)
-        // when a form is submitted — we handle everything ourselves in JS
+    async function handleSubmit(event) 
+    {
         event.preventDefault();
-
-        // TODO: Replace the block below with a real backend call, like this:
-        // ─────────────────────────────────────────────────────────────────────
-        // const response = await axios.post(
-        //     "/api/super-admin/clients",  // URL: backend endpoint for creating clients
-        //     formData                     // BODY: all form fields sent as JSON
-        // );
-        // const savedClient = response.data; // backend returns the new client with a real DB id
-        // Then use savedClient instead of newClient below
-        // ─────────────────────────────────────────────────────────────────────
-
-        // For now: build the new client object locally
-        const newClient = {
-            id: Date.now(), // temporary ID using timestamp — replace with real DB id later
-            ...formData,    // spread all form fields (clientName, email, phone, etc.) in
+        const clientPayload = {
+            clientName: formData.clientName,
+            businessName: formData.businessName,
+            websiteURL: formData.websiteURL,
+            email: formData.email,
+            phone: formData.phone,
+            status: formData.status,
+            category: formData.category
         };
-
-        // Add the new client to the FRONT of the list so it appears at the top
-        setClients((previousClients) => [newClient, ...previousClients]);
-
+        const addClientResponse = await addClient(clientPayload);
+        
+        const loginPayload = {
+            clientId: addClientResponse.data._id, // use the real client ID returned from the backend
+            username: formData.username,
+            password: formData.password,
+        };
+        const addClientCredentialsResponse = await addClientCredentials(loginPayload);
         resetForm(); // clear the form so the user can add another client
     }
 
+    function getClientIdentifier(client) {
+        return client._id || client.id || client.email;
+    }
+
     function handleDeleteClient(clientId) {
-        setClients((previousClients) => previousClients.filter((client) => client.id !== clientId));
+        setClients((previousClients) => previousClients.filter((client) => getClientIdentifier(client) !== clientId));
     }
 
     return (
@@ -187,7 +119,7 @@ function SuperClients() {
                             <label className={styles.field}>
                                 <span className={styles.label}>Email *</span>
                                 <input
-                                    type="email"
+                                    type="text"
                                     name="email"
                                     value={formData.email}
                                     onChange={handleInputChange}
@@ -215,6 +147,15 @@ function SuperClients() {
                                 <option value="Active">Active</option>
                                 <option value="Onboarding">Onboarding</option>
                                 <option value="Inactive">Inactive</option>
+                            </select>
+                        </label>
+                        
+                        <label className={styles.field}>
+                            <span className={styles.label}>Category *</span>
+                            <select name="category" value={formData.category} onChange={handleInputChange}>
+                                <option value="starter">Starter Plan Client</option>
+                                <option value="premium">Premium Plan Client</option>
+                                <option value="luxury">Luxury Plan Client</option>
                             </select>
                         </label>
                     </fieldset>
@@ -261,6 +202,7 @@ function SuperClients() {
                                 <th>Email</th>
                                 <th>Phone</th>
                                 <th>Status</th>
+                                <th>Role</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -273,7 +215,7 @@ function SuperClients() {
                                 </tr>
                             ) : (
                                 clients.map((client) => (
-                                    <tr key={client.id}>
+                                    <tr key={getClientIdentifier(client)}>
                                         <td>{client.clientName}</td>
                                         <td>{client.businessName}</td>
                                         <td>{client.email}</td>
@@ -290,7 +232,7 @@ function SuperClients() {
                                                 <button
                                                     type="button"
                                                     className={styles.deleteButton}
-                                                    onClick={() => handleDeleteClient(client.id)}
+                                                    onClick={() => handleDeleteClient(getClientIdentifier(client))}
                                                 >
                                                     Remove
                                                 </button>

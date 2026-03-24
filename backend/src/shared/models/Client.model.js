@@ -3,19 +3,18 @@ import { Schema, model } from "mongoose";
 // SCHEMA
 const clientSchema = new Schema(
     {
-        name            : { type: String, required: true },
+        clientName      : { type: String, required: true },
         businessName    : { type: String, required: true },
         websiteURL      : { type: String },
         email           : { type: String, required: true, unique: true },
-        phone           : { type:Number, required: true },
-        status          : { type: String, default: "Active" }
+        phone           : { type: String, required: true },
+        status          : { type: String, default: "Active" },
+        role            : { type: String, default: "client" }
     },
     {
-        timestamps: true,
-        collection: "client_model"
+        timestamps: true
     }
 );
 
-const ClientModel = model("ClientModel", clientSchema);
-
+const ClientModel = model("client", clientSchema);
 export default ClientModel;
