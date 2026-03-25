@@ -12,9 +12,9 @@ const clientRouter = Router();
 
 /**
  * @swagger
- * /admin/clients/addClient:
+ * /shared/clients/addClient:
  *   post:
- *     summary: Create a new client (Admin)
+ *     summary: Create a new shared client
  *     tags: [Clients]
  *     requestBody:
  *       required: true
@@ -48,9 +48,9 @@ clientRouter.post("/addClient", createClient);
 
 /**
  * @swagger
- * /admin/clients/getAllClients:
+ * /shared/clients/getAllClients:
  *   get:
- *     summary: Get all active clients (Admin)
+ *     summary: Get all active shared clients
  *     tags: [Clients]
  *     responses:
  *       200:
@@ -60,9 +60,9 @@ clientRouter.get("/getAllClients", getAllClients);
 
 /**
  * @swagger
- * /admin/clients/removeClient/{clientId}:
+ * /shared/clients/removeClient/{clientId}:
  *   patch:
- *     summary: Soft delete client by id (Admin)
+ *     summary: Soft delete shared client by id
  *     tags: [Clients]
  *     parameters:
  *       - in: path

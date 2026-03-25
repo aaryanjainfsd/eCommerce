@@ -52,14 +52,19 @@ app.use("/storefront/auth", authRouter);
 
 //----------------------------- ADMIN ROUTES -------------------------------------------------
 app.use("/admin/auth", AdminAuthRouter);
-app.use("/admin/clients", ClientRouter);
 // -------------------------------------------------------------------------------------------
 
 
 //----------------------------- SUPER ADMIN ROUTES -------------------------------------------
 app.use("/superAdmin/auth", SuperAdminAuthRouter);
-app.use("/superAdmin/clients", ClientRouter);
 // -------------------------------------------------------------------------------------------
+
+
+//----------------------------- SHARED ROUTES ------------------------------------------------
+app.use("/shared/clients", ClientRouter);
+// -------------------------------------------------------------------------------------------
+
+
 
 // Starting the server
 app.listen(process.env.PORT, () => { console.log(`Server is running on port ${process.env.PORT}`); });
