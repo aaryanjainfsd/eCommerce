@@ -8,6 +8,7 @@ import productRouter from "../../storeFront/routes/ProductRouter.js";
 
 export async function registerFunction(req, res) {
     try {
+        console.log("Received registration request with body:", req.body);
         const { username, password, client_id } = req.body;
         const futureSampleId = `sample_${Date.now()}`;
 
@@ -54,7 +55,7 @@ export async function registerFunction(req, res) {
         }
     }
     catch (error) {
-        console.log("Some error came");
+        console.log("Some error came". error);
         res.status(500).json({
             message: "Admin registration failed",
             error: error.message

@@ -2,6 +2,8 @@ import "dotenv/config";
 import cors from "cors";
 import express from "express";
 import cookieParser from "cookie-parser";
+import swaggerUi from "swagger-ui-express";
+import swaggerSpec from "./src/shared/config/swagger.js";
 
 
 // DB Connection 
@@ -23,17 +25,17 @@ import AdminAuthRouter from "./src/adminPanel/routes/AdminAuthRouter.js";
 import SuperAdminAuthRouter from "./src/superAdminPanel/routes/SuperAdminAuthRouter.js";
 // -------------------------------------------------------------------------------------------
 
-
-
 const app = express();
 app.use(express.json());
 app.use(cookieParser());
 
 app.use(cors({
 	origin: "http://localhost:5173",
-	methods: ["GET", "POST", "PUT", "DELETE"],
+	methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
 	credentials: true
 }));
+
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec, { explorer: true }));
 
 app.use("/uploads", express.static("uploads"));
 

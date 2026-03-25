@@ -209,6 +209,37 @@
   color: #b33a3a;
 }
 
+/* ─── Validation Error State ────────────────────────── */
+.field input.inputError,
+.field select.inputError {
+  border-color: #e05252;
+  background-color: #fff8f8;
+}
+
+.field input.inputError:focus,
+.field select.inputError:focus {
+  border-color: #c0392b;
+  box-shadow: 0 0 0 3px rgba(192, 57, 43, 0.12);
+}
+
+.fieldError {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #c0392b;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 1px;
+  line-height: 1.3;
+}
+
+.fieldError::before {
+  content: "⚠";
+  font-size: 0.68rem;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
 /* ─── Responsive ────────────────────────────────────── */
 @media (max-width: 680px) {
   .card {

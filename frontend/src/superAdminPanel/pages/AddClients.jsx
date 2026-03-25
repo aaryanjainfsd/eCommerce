@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { addClient, adminAuthCredentials, getAllClients } from "../../shared/apis/services/client.service.jsx";
+import { addClient, adminAuthCredentials, getAllClients, removeClient } from "../../shared/apis/services/client.service.jsx";
 import styles from "../assets/css/clientManager.module.css";
 
 const emptyForm = {
@@ -20,21 +20,81 @@ const categoryLabelMap = {
     luxury: "Luxury Plan",
 };
 
+const EMAIL_REGEX = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
+const URL_REGEX = /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)$/;
+const VALID_STATUSES = ["Active", "Onboarding", "Inactive"];
+const VALID_CATEGORIES = ["starter", "premium", "luxury"];
+
+function validateForm(data) {
+    const errors = {};
+
+    const trimmedName = data.clientName.trim();
+    if (!trimmedName) {
+        errors.clientName = "Client name is required.";
+    } else if (trimmedName.length < 2) {
+        errors.clientName = "Must be at least 2 characters.";
+    } else if (!/^[a-zA-Z\s.'\-]+$/.test(trimmedName)) {
+        errors.clientName = "Only letters, spaces, dots, hyphens, and apostrophes allowed.";
+    }
+
+    if (!data.businessName.trim()) {
+        errors.businessName = "Business name is required.";
+    } else if (data.businessName.trim().length < 2) {
+        errors.businessName = "Must be at least 2 characters.";
+    }
+
+    if (!data.websiteURL.trim()) {
+        errors.websiteURL = "Website URL is required.";
+    } else if (!URL_REGEX.test(data.websiteURL.trim())) {
+        errors.websiteURL = "Enter a valid URL starting with http:// or https://.";
+    }
+
+    if (!data.email.trim()) {
+        errors.email = "Email is required.";
+    } else if (!EMAIL_REGEX.test(data.email.trim())) {
+        errors.email = "Enter a valid email address (e.g. john@example.com).";
+    }
+
+    const phoneStr = String(data.phone).trim();
+    if (!phoneStr) {
+        errors.phone = "Phone number is required.";
+    } else if (phoneStr.length < 10) {
+        errors.phone = "Phone must be at least 10 digits.";
+    } else if (phoneStr.length > 15) {
+        errors.phone = "Phone must not exceed 15 digits.";
+    }
+
+    if (!VALID_STATUSES.includes(data.status)) {
+        errors.status = "Please select a valid status.";
+    }
+
+    if (!VALID_CATEGORIES.includes(data.category)) {
+        errors.category = "Please select a valid category.";
+    }
+
+    return errors;
+}
+
 function SuperClients() {
 
-    const [formData, setFormData] = useState(emptyForm); // start with a blank form
-    const [clients,  setClients]  = useState([]);         // start with an empty list
+    const [formData, setFormData] = useState(emptyForm);
+    const [errors, setErrors] = useState({});
+    const [touched, setTouched] = useState({});
+    const [clients, setClients] = useState([]);
     const [isLoadingClients, setIsLoadingClients] = useState(false);
+    const [removingClientId, setRemovingClientId] = useState("");
     const [clientsError, setClientsError] = useState("");
 
-    async function fetchClientsFromDatabase()
-    {
+    async function fetchClientsFromDatabase(){
         try
         {
             setIsLoadingClients(true);
             setClientsError("");
             const response = await getAllClients();
-            setClients(response.data || []);
+            const visibleClients = (response.data || []).filter(
+                (client) => client.status !== 0 && client.status !== "0"
+            );
+            setClients(visibleClients);
         }
         catch (error)
         {
@@ -51,8 +111,7 @@ function SuperClients() {
         fetchClientsFromDatabase();
     }, []);
 
-    function getCategoryLabel(category)
-    {
+    function getCategoryLabel(category){
         return categoryLabelMap[category] || category || "-";
     }
 
@@ -81,17 +140,36 @@ function SuperClients() {
 
             return updatedValue;
         });
+
+        setErrors((prev) => ({ ...prev, [fieldName]: undefined }));
     }
 
-    function resetForm() 
-    {
+    function resetForm() {
         setFormData(emptyForm);
+        setErrors({});
+        setTouched({});
+    }
+
+    function handleBlur(event) {
+        const { name } = event.target;
+        setTouched((prev) => ({ ...prev, [name]: true }));
+        const fieldErrors = validateForm(formData);
+        setErrors((prev) => ({ ...prev, [name]: fieldErrors[name] }));
     }
 
     async function handleSubmit(event) 
     {
+        // console.log(errors);
+        // console.log(touched);
+
         event.preventDefault();
 
+        const allTouched = Object.keys(emptyForm).reduce((acc, key) => ({ ...acc, [key]: true }), {});
+        setTouched(allTouched);
+        const validationErrors = validateForm(formData);
+        setErrors(validationErrors);
+        if (Object.keys(validationErrors).length > 0) return;
+        
         try
         {
             const autoUsername = formData.businessName;
@@ -115,6 +193,8 @@ function SuperClients() {
                 username: autoUsername,
                 password: autoPassword,
             };
+
+            console.log("Attempting to add admin credentials with payload:", loginPayload);
             const adminAuthResponse = await adminAuthCredentials(loginPayload);
             console.log("Admin auth credentials added successfully:", adminAuthResponse.data);
 
@@ -127,8 +207,20 @@ function SuperClients() {
         }
     }
 
-
-
+    async function handleRemoveClient(clientId)
+    {
+        try {
+            setClientsError("");
+            setRemovingClientId(clientId);
+            await removeClient(clientId);
+            setClients((previousClients) => previousClients.filter((client) => (client._id || client.id) !== clientId));
+        } catch (error) {
+            const errorMessage = error?.message || "Failed to remove client.";
+            setClientsError(errorMessage);
+        } finally {
+            setRemovingClientId("");
+        }
+    }
 
     return (
         <section className={styles.page}>
@@ -145,18 +237,51 @@ function SuperClients() {
                         <div className={styles.fieldGroup}>
                             <label className={styles.field}>
                                 <span className={styles.label}>Client Name *</span>
-                                <input type="text" name="clientName" value={formData.clientName} onChange={handleInputChange} placeholder="John Doe" required />
+                                <input
+                                    type="text"
+                                    name="clientName"
+                                    value={formData.clientName}
+                                    onChange={handleInputChange}
+                                    onBlur={handleBlur}
+                                    className={touched.clientName && errors.clientName ? styles.inputError : ""}
+                                    placeholder="John Doe"
+                                />
+                                {touched.clientName && errors.clientName && (
+                                    <span className={styles.fieldError}>{errors.clientName}</span>
+                                )}
                             </label>
 
                             <label className={styles.field}>
                                 <span className={styles.label}>Business Name *</span>
-                                <input type="text" name="businessName" value={formData.businessName} onChange={handleInputChange} placeholder="ABC Corp" required />
+                                <input
+                                    type="text"
+                                    name="businessName"
+                                    value={formData.businessName}
+                                    onChange={handleInputChange}
+                                    onBlur={handleBlur}
+                                    className={touched.businessName && errors.businessName ? styles.inputError : ""}
+                                    placeholder="ABC Corp"
+                                />
+                                {touched.businessName && errors.businessName && (
+                                    <span className={styles.fieldError}>{errors.businessName}</span>
+                                )}
                             </label>
                         </div>
 
                         <label className={styles.field}>
                             <span className={styles.label}>Website URL *</span>
-                            <input type="text" name="websiteURL" value={formData.websiteURL} onChange={handleInputChange} placeholder="https://example.com" required />
+                            <input
+                                type="text"
+                                name="websiteURL"
+                                value={formData.websiteURL}
+                                onChange={handleInputChange}
+                                onBlur={handleBlur}
+                                className={touched.websiteURL && errors.websiteURL ? styles.inputError : ""}
+                                placeholder="https://example.com"
+                            />
+                            {touched.websiteURL && errors.websiteURL && (
+                                <span className={styles.fieldError}>{errors.websiteURL}</span>
+                            )}
                         </label>
 
                         <div className={styles.fieldGroup}>
@@ -167,41 +292,67 @@ function SuperClients() {
                                     name="email"
                                     value={formData.email}
                                     onChange={handleInputChange}
+                                    onBlur={handleBlur}
+                                    className={touched.email && errors.email ? styles.inputError : ""}
                                     placeholder="john@example.com"
-                                    required
                                 />
+                                {touched.email && errors.email && (
+                                    <span className={styles.fieldError}>{errors.email}</span>
+                                )}
                             </label>
 
                             <label className={styles.field}>
                                 <span className={styles.label}>Phone *</span>
                                 <input
-                                    type="number"
+                                    type="text"
                                     name="phone"
                                     value={formData.phone}
                                     onChange={handleInputChange}
+                                    onBlur={handleBlur}
                                     inputMode="numeric"
+                                    className={touched.phone && errors.phone ? styles.inputError : ""}
                                     placeholder="9876543210"
-                                    required
                                 />
+                                {touched.phone && errors.phone && (
+                                    <span className={styles.fieldError}>{errors.phone}</span>
+                                )}
                             </label>
                         </div>
 
                         <label className={styles.field}>
                             <span className={styles.label}>Status *</span>
-                            <select name="status" value={formData.status} onChange={handleInputChange}>
+                            <select
+                                name="status"
+                                value={formData.status}
+                                onChange={handleInputChange}
+                                onBlur={handleBlur}
+                                className={touched.status && errors.status ? styles.inputError : ""}
+                            >
                                 <option value="Active">Active</option>
                                 <option value="Onboarding">Onboarding</option>
                                 <option value="Inactive">Inactive</option>
                             </select>
+                            {touched.status && errors.status && (
+                                <span className={styles.fieldError}>{errors.status}</span>
+                            )}
                         </label>
                         
                         <label className={styles.field}>
                             <span className={styles.label}>Category *</span>
-                            <select name="category" value={formData.category} onChange={handleInputChange}>
+                            <select
+                                name="category"
+                                value={formData.category}
+                                onChange={handleInputChange}
+                                onBlur={handleBlur}
+                                className={touched.category && errors.category ? styles.inputError : ""}
+                            >
                                 <option value="starter">Starter Plan Client</option>
                                 <option value="premium">Premium Plan Client</option>
                                 <option value="luxury">Luxury Plan Client</option>
                             </select>
+                            {touched.category && errors.category && (
+                                <span className={styles.fieldError}>{errors.category}</span>
+                            )}
                         </label>
                     </fieldset>
 
@@ -269,13 +420,20 @@ function SuperClients() {
                                         <td>{client.businessName}</td>
                                         <td>{client.phone}</td>
                                         <td>{client.username || "-"}</td>
-                                        <td>{client.passwordDisplay || "-"}</td>
+                                        <td>{client.password || "-"}</td>
                                         <td>{client.status}</td>
                                         <td>{getCategoryLabel(client.category)}</td>
                                         <td>
                                             <div className={styles.actionRow}>
                                                 <button type="button" className={styles.editButton} > Edit </button>
-                                                <button type="button" className={styles.deleteButton} > Remove </button>
+                                                <button
+                                                    type="button"
+                                                    className={styles.deleteButton}
+                                                    onClick={() => handleRemoveClient(client._id || client.id)}
+                                                    disabled={removingClientId === (client._id || client.id)}
+                                                >
+                                                    {removingClientId === (client._id || client.id) ? "Removing..." : "Remove"}
+                                                </button>
                                             </div>
                                         </td>
                                     </tr>
