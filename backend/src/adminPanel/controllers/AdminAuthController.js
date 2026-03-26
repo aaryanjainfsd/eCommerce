@@ -66,7 +66,9 @@ export async function registerFunction(req, res) {
 export async function loginFunction(req, res) {
     try {
         const { username, password } = req.body;
+        console.log("Received login request with body:", req.body);
         const user = await AdminAuthModel.findOne({ "data.username": username });
+        console.log("Found user:", user);
         if (!user) {
             return res.status(404).json({ message: "Invalid username or password" });
         }

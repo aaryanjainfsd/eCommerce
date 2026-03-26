@@ -4,7 +4,7 @@ export async function addClient(clientData)
 {
     try 
     {
-        const response = await axiosInstance.post("admin/clients/addClient", clientData, { withCredentials: true });
+        const response = await axiosInstance.post("shared/clients/addClient", clientData, { withCredentials: true });
         return response;
     }
     catch(error) 
@@ -17,7 +17,7 @@ export async function getAllClients()
 {
     try
     {
-        const response = await axiosInstance.get("admin/clients/getAllClients", { withCredentials: true });
+        const response = await axiosInstance.get("shared/clients/getAllClients", { withCredentials: true });
         return response;
     }
     catch(error)
@@ -44,7 +44,7 @@ export async function removeClient(clientId)
 {
     try
     {
-        const response = await axiosInstance.patch(`admin/clients/removeClient/${clientId}`, {}, { withCredentials: true });
+        const response = await axiosInstance.patch(`shared/clients/removeClient/${clientId}`, {}, { withCredentials: true });
         return response;
     }
     catch(error)
