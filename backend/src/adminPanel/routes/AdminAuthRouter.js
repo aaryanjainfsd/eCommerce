@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { loginFunction, registerFunction } from '../controllers/AdminAuthController.js';
+import { loginFunction, registerFunction, verifyUsernameFunction } from '../controllers/AdminAuthController.js';
 const adminAuthRouter = Router();
 
 /**
@@ -8,6 +8,30 @@ const adminAuthRouter = Router();
  *   name: Admin Auth
  *   description: Admin authentication APIs
  */
+
+/**
+ * @swagger
+ * /admin/auth/verify-username:
+ *   post:
+ *     summary: Verify if username exists in the system
+ *     tags: [Admin Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [username]
+ *             properties:
+ *               username:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Username verified successfully
+ *       404:
+ *         description: Username not found
+ */
+adminAuthRouter.post('/verify-username', verifyUsernameFunction);
 
 /**
  * @swagger

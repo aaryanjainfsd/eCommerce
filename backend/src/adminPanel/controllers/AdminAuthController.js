@@ -116,3 +116,46 @@ export async function loginFunction(req, res) {
         });
     }
 }
+
+/**
+ * Verify if a username exists in the admin system
+ * Used for real-time validation on the login page
+ * Returns user info without password if username is found
+ * This allows the frontend to show "Hello [username], verified" message
+ */
+export async function verifyUsernameFunction(req, res) {
+    try {
+        // Extract username from request body
+        const { username } = req.body;
+
+        // Validate that username is provided
+        if (!username || username.trim() === '') {
+            return res.status(400).json({ message: "Username is required" });
+        }
+
+        // Search for user with matching username in database
+        const user = await AdminAuthModel.findOne({ "data.username": username });
+
+        // If user not found, return 404 error
+        if (!user) {
+            return res.status(404).json({ message: "Username not found" });
+        }
+
+        // If user found, return user info without password for security
+        return res.status(200).json({
+            message: "Username verified",
+            user: {
+                id: user._id,
+                username: user.data.username,
+                role: "admin"
+            }
+        });
+    }
+    catch (error) {
+        console.log("Error during username verification:", error);
+        res.status(500).json({
+            message: "Username verification failed",
+            error: error.message
+        });
+    }
+}
