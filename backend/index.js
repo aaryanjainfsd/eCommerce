@@ -35,6 +35,12 @@ app.use(cors({
 	credentials: true
 }));
 
+app.use(cors({
+	origin: process.env.FRONTEND_URL,
+	methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+	credentials: true
+}));
+
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec, { explorer: true }));
 
 app.use("/uploads", express.static("uploads"));

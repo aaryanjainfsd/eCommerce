@@ -42,6 +42,7 @@ export async function loginFunction(req, res){
     {
         const { username , password , role} = req.body;
         const user = await SuperAdminAuthModel.findOne({ username });
+        
         if (!user)
         {
             return res.status(401).json({ message: "Invalid username or password" });
