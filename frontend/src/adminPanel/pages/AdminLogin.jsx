@@ -20,15 +20,9 @@ function AdminLogin() {
     const debounceTimerRef = useRef(null);
     
     const navigate = useNavigate();
-    const { isLoggedIn, setUser } = useAdminAuthStore();
+    const { setUser } = useAdminAuthStore();
 
-    // Redirect if already logged in
-    useEffect(() => {
-        // If user is already authenticated in the store, redirect to dashboard
-        if (isLoggedIn) {
-            navigate("/admin/dashboard");
-        }
-    }, [isLoggedIn, navigate]);
+    
 
     /**
      * Debounced username validation function
@@ -58,7 +52,6 @@ function AdminLogin() {
                 // Call API to verify username exists
                 const response = await verifyUsernameAPI(username);
                 
-                console.log(response);
                 // Username verified - store user info and show success state
                 setUserInfo(response.data.user);
                 setUsernameStatus('verified');
@@ -86,17 +79,15 @@ function AdminLogin() {
         if (name === 'username') {
             validateUsername(value);
         }
-    }
-
-    
+    } 
 
     /**
      * Handle login form submission
      * Only enabled after username is verified
      * Validates credentials and authenticates user
      */
-    async function handleSubmit(e) {
-        e.preventDefault();
+    async function handleSubmit(event) {
+        event.preventDefault();
         
         // Prevent submission if username not verified
         if (usernameStatus !== 'verified') {
@@ -107,22 +98,18 @@ function AdminLogin() {
         setIsSubmitting(true);
         setIsError(null);
 
-        try {
-            // Send credentials to backend for authentication
+        try 
+        {
             const response = await loginUserAPI(data);
-            
-            // Store user info in global state
             setUser({
                 username: response.data.user.username,
                 role: response.data.user.role
             });
-            
-            // Redirect to admin dashboard
             navigate("/admin/dashboard");
         }
         catch (error) {
-            // Show authentication error
-            setIsError(error.response?.data?.message || "Authentication failed. Please check your credentials.");
+            const msg = error?.response?.data?.message || "Login failed. Your secret credentials are incorrect.";
+            setIsError(msg);
         }
         finally {
             setIsSubmitting(false);
@@ -203,6 +190,14 @@ function AdminLogin() {
                     <h2 className={styles.cardTitle}>Sign In</h2>
                     <p className={styles.cardSubtitle}>Access your partner dashboard</p>
 
+                   {/* Error message display */}
+                    {isError && (
+                        <div className={styles.errorAlert}>
+                            <span className={styles.errorIcon}>⚠️</span>
+                            <p>{isError}</p>
+                        </div>
+                    )} 
+
                     {/* Login form */}
                     <form className={styles.loginForm} onSubmit={handleSubmit}>
                         {/* Username input field */}
@@ -254,13 +249,7 @@ function AdminLogin() {
                             )}
                         </div>
 
-                        {/* Error message display */}
-                        {isError && (
-                            <div className={styles.errorAlert}>
-                                <span className={styles.errorIcon}>⚠️</span>
-                                <p>{isError}</p>
-                            </div>
-                        )}
+                        
 
                         {/* Submit button */}
                         <button

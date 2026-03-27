@@ -13,20 +13,17 @@ import { SuperAdminLoginAPI } from "../api/services/superAdminAuth.jsx";
 // ZUSTAND STORE IMPORT 
 import useSuperAdminAuthStore from "../stores/SuperAdminAuthStore.jsx";
 
-
-
-
 function SuperAdminLogin()
 {
     const [data, setData] = useState({ username: "", password: "" });
     const [errorMessage, setErrorMessage] = useState("");
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const navigate = useNavigate();
     const { setUser } = useSuperAdminAuthStore();
 
 
-    function handleChange(event)
-    {
+    function handleChange(event){
         const { name, value } = event.target;
         setData((previousValue) => ({ ...previousValue, [name]: value }));
     }
@@ -35,8 +32,8 @@ function SuperAdminLogin()
     {
         event.preventDefault();
         setErrorMessage("");
-        try
-        {
+        setIsSubmitting(true);
+        try{
             const response = await SuperAdminLoginAPI(data);
             setUser({
                 name: response.data.user.name,
@@ -45,10 +42,12 @@ function SuperAdminLogin()
             })
             navigate("/superAdminPanel/clients");
         }
-        catch (error)
-        {
+        catch (error){
             const msg = error?.message || "Login failed. Please try again.";
             setErrorMessage(msg);
+        }
+        finally {
+            setIsSubmitting(false);
         }
     }
 
@@ -116,9 +115,9 @@ function SuperAdminLogin()
                             <button type="button" className={styles.linkButton}>Need help?</button>
                         </div>
 
-                        <button type="submit" className={styles.submitButton}>
+                        <button type="submit" className={styles.submitButton} disabled={isSubmitting}>
                             <LockKeyhole size={16} />
-                            Secure Login
+                            {isSubmitting ? "Signing in..." : "Secure Login"}
                         </button>
                     </form>
 

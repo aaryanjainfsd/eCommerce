@@ -27,9 +27,9 @@ import SuperAdminLogin from "../../superAdminPanel/pages/Login.jsx";
 
 
 // ==================== PROTECTED ROUTES ====================
-import ProtectedRoute from "./ProtectedRoute";
-import AdminProtectedRoute from "./AdminProtectedRoute";
-import SuperAdminProtectedRoute from "./SuperAdminProtectedRoute.jsx";
+import UserProtectedRoute from "./protectedRoutes/UserProtectedRoute";
+import AdminProtectedRoute from "./protectedRoutes/AdminProtectedRoute";
+import SuperAdminProtectedRoute from "./protectedRoutes/SuperAdminProtectedRoute";
 
 // ==================== CONTEXT PROVIDERS ====================
 import FirebaseProvider from "../../storeFront/contexts/FirebaseProvider";
@@ -45,7 +45,7 @@ const storeFrontChildren = [
     { path: "register", element: <Register /> },
     { path: "allproducts", element: <AllProducts /> },
     { path: "product-details/:id", element: <ProductDetails /> },
-    { path: "checkout", element: (<ProtectedRoute> <Checkout/> </ProtectedRoute>)},
+    { path: "checkout", element: (<UserProtectedRoute> <Checkout/> </UserProtectedRoute>)},
 ];
 
 const adminChildren = [
@@ -68,10 +68,11 @@ const router = createBrowserRouter([
     },
     // ================= ADMIN PANEL =================
 	{
-		path: "/adminPanel",
+        path: "/adminPanel",
 		element: <AdminOutlet />,
 		children:  adminChildren
 	},
+    // ================= SUPER ADMIN PANEL =================
     {
         path: "/superAdminPanel",
         element: <SuperAdminPanelOutlet />,
