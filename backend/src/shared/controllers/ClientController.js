@@ -1,9 +1,9 @@
 import ClientModel from '../models/Client.model.js';
+import AdminAuthModel from '../../adminPanel/models/AdminAuth.model.js';
 import bcrypt from 'bcryptjs';
 
 
-export async function createClient(req, res)
-{
+export async function createClient(req, res){
     try {
         const { clientName, businessName, websiteURL, email, phone, status, category } = req.body;
 
@@ -33,8 +33,7 @@ export async function createClient(req, res)
     }
 }
 
-export async function getAllClients(req, res)
-{
+export async function getAllClients(req, res){
     try {
         const clients = await ClientModel.aggregate([
             {
@@ -131,7 +130,7 @@ export async function getAllClients(req, res)
     }
 }
 
-export async function softDeleteClient(req, res)
+export async function toggleClientStatus(req, res)
 {
     try {
         const { clientId } = req.params;
@@ -140,19 +139,54 @@ export async function softDeleteClient(req, res)
             return res.status(400).json({ message: "Client ID is required" });
         }
 
-        const updatedClient = await ClientModel.findByIdAndUpdate(
-            clientId,
-            { status: 0 },
-            { new: true }
-        );
+        const existingClient = await ClientModel.findById(clientId);
 
-        if (!updatedClient) {
+        if (!existingClient) {
             return res.status(404).json({ message: "Client not found" });
         }
 
+        const currentStatus =
+            typeof existingClient.status === "string"
+                ? existingClient.status.trim()
+                : "";
+
+        const nextStatus = currentStatus === "Inactive" ? "Active" : "Inactive";
+
+        existingClient.status = nextStatus;
+        await existingClient.save();
+
         return res.status(200).json({
-            message: "Client removed successfully",
-            client: updatedClient
+            message: `Client ${nextStatus === "Active" ? "activated" : "deactivated"} successfully`,
+            client: existingClient
+        });
+    } catch (error) {
+        return res.status(500).json({ message: "Internal server error", error: error.message });
+    }
+}
+
+export async function permanentlyDeleteClient(req, res)
+{
+    try {
+        const { clientId } = req.params;
+
+        if (!clientId) {
+            return res.status(400).json({ message: "Client ID is required" });
+        }
+
+        const existingClient = await ClientModel.findById(clientId);
+
+        if (!existingClient) {
+            return res.status(404).json({ message: "Client not found" });
+        }
+
+        await Promise.all([
+            ClientModel.findByIdAndDelete(clientId),
+            AdminAuthModel.deleteMany({ "foreignKeys.client_id": clientId })
+        ]);
+
+        return res.status(200).json({
+            message: "Client permanently deleted successfully",
+            client: existingClient
         });
     } catch (error) {
         return res.status(500).json({ message: "Internal server error", error: error.message });

@@ -40,11 +40,11 @@ export async function adminAuthCredentials(loginData)
     }
 }
 
-export async function removeClient(clientId)
+export async function toggleClientStatus(clientId)
 {
     try
     {
-        const response = await axiosInstance.patch(`shared/clients/removeClient/${clientId}`, {}, { withCredentials: true });
+        const response = await axiosInstance.patch(`shared/clients/toggleClientStatus/${clientId}`, {}, { withCredentials: true });
         return response;
     }
     catch(error)
@@ -52,4 +52,19 @@ export async function removeClient(clientId)
         throw error.response?.data || error;
     }
 }
+
+export async function permanentlyDeleteClient(clientId)
+{
+    try
+    {
+        const response = await axiosInstance.delete(`shared/clients/deleteClient/${clientId}`, { withCredentials: true });
+        return response;
+    }
+    catch(error)
+    {
+        throw error.response?.data || error;
+    }
+}
+
+export const removeClient = toggleClientStatus;
 

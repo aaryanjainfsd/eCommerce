@@ -1,63 +1,93 @@
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import useAdminAuthStore from "../stores/adminAuthStore";
-import { Home, Package, ShoppingCart, Search, Bell, User } from 'lucide-react';
+import { Bell, LogOut, Menu, Settings, User } from 'lucide-react';
 import styles from '../assets/css/header.module.css';
 
-function Header() {
+const notifications = [
+    {
+        id: 1,
+        title: "New partner order",
+        message: "Order #A392 is waiting for confirmation.",
+        time: "2m ago",
+    },
+    {
+        id: 2,
+        title: "Stock alert",
+        message: "3 products are running low in inventory.",
+        time: "18m ago",
+    },
+    {
+        id: 3,
+        title: "Payout processed",
+        message: "Weekly settlement has been completed.",
+        time: "1h ago",
+    },
+];
+
+function Header({ onMobileMenuToggle }) {
     const navigate = useNavigate();
     const { user, setLoggedOut } = useAdminAuthStore();
 
     const handleLogout = () => {
-        // Clear stored auth state and send user to login page
         setLoggedOut();
-        navigate("/admin");
+        navigate("/adminPanel");
+    };
+
+    const handleSettings = () => {
+        navigate("/adminPanel/dashboard");
     };
 
     return (
         <header className={styles.header}>
             <div className={styles.left}>
+                <button
+                    type="button"
+                    className={styles.mobileMenuBtn}
+                    onClick={onMobileMenuToggle}
+                    aria-label="Toggle sidebar"
+                >
+                    <Menu size={20} />
+                </button>
                 <div className={styles.brand}>
                     <span className={styles.logo}>E</span>
                     <span>eComForAll Admin</span>
                 </div>
             </div>
-            <div className={styles.center}>
-                <div className={styles.search}>
-                    <Search size={20} />
-                    <input type="text" placeholder="Search products, orders..." />
-                </div>
-            </div>
             <div className={styles.right}>
-                <nav className={styles.nav}>
-                    <Link to="/admin/dashboard" className={styles.navLink}>
-                        <Home size={20} />
-                        <span>Dashboard</span>
-                    </Link>
-                    <Link to="/admin/products" className={styles.navLink}>
-                        <Package size={20} />
-                        <span>Products</span>
-                    </Link>
-                    <Link to="/admin/orders" className={styles.navLink}>
-                        <ShoppingCart size={20} />
-                        <span>Orders</span>
-                    </Link>
-                </nav>
-                <div className={styles.notifications}>
-                    <Bell size={20} />
-                    <span className={styles.badge}>3</span>
-                </div>
-                <div className={styles.userSection}>
-                    {user?.username && (
-                        <div className={styles.userInfo}>
-                            <User size={20} />
-                            <span className={styles.welcome}>
-                                Welcome, {user.username}
-                            </span>
-                        </div>
-                    )}
-                    <button onClick={handleLogout} className={styles.logoutBtn}>
-                        Logout
+                <div className={styles.notificationWrapper}>
+                    <button type="button" className={styles.notifications}>
+                        <Bell size={20} />
+                        <span className={styles.badge}>{notifications.length}</span>
                     </button>
+                    <div className={styles.notificationDropdown}>
+                        <div className={styles.notificationHeader}>Notifications</div>
+                        {notifications.map((item) => (
+                            <button key={item.id} type="button" className={styles.notificationItem}>
+                                <span className={styles.notificationDot}></span>
+                                <div className={styles.notificationContent}>
+                                    <p className={styles.notificationTitle}>{item.title}</p>
+                                    <p className={styles.notificationMessage}>{item.message}</p>
+                                </div>
+                                <span className={styles.notificationTime}>{item.time}</span>
+                            </button>
+                        ))}
+                    </div>
+                </div>
+                <div className={styles.profileWrapper}>
+                    <button type="button" className={styles.profileButton}>
+                        <User size={18} />
+                        <span className={styles.welcome}>{user?.username || "Admin"}</span>
+                    </button>
+                    <div className={styles.profileDropdown}>
+                        <button type="button" className={styles.dropdownItem} onClick={handleSettings}>
+                            <Settings size={16} />
+                            <span>Settings</span>
+                        </button>
+                        <button type="button" className={styles.dropdownItem} onClick={handleLogout}>
+                            <LogOut size={16} />
+                            <span>Logout</span>
+                        </button>
+                    </div>
                 </div>
             </div>
         </header>

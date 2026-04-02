@@ -5,10 +5,10 @@ import useSuperAdminAuthStore from "../../../superAdminPanel/stores/SuperAdminAu
 export default function SuperAdminProtectedRoute({ children }) 
 {
     const { isLoggedIn } = useSuperAdminAuthStore();
-    
+
     if (!isLoggedIn) {
         return <Navigate to="/superAdminPanel" replace />;
     }
-
+    
     return children;
 }

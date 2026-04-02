@@ -185,10 +185,11 @@
 /* ─── Table Action Buttons ──────────────────────────── */
 .actionRow {
   display: inline-flex;
+  flex-wrap: wrap;
   gap: 8px;
 }
 
-.editButton,
+.toggleButton,
 .deleteButton {
   border: none;
   border-radius: 7px;
@@ -197,9 +198,16 @@
   font-size: 0.8rem;
   font-weight: 700;
   cursor: pointer;
+  transition: opacity 0.15s ease;
 }
 
-.editButton {
+.toggleButton:disabled,
+.deleteButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.toggleButton {
   background: #dff0eb;
   color: #0a6e5a;
 }
@@ -207,6 +215,14 @@
 .deleteButton {
   background: #fde8e8;
   color: #b33a3a;
+}
+
+.inactiveRow {
+  background: #f2f4f7;
+}
+
+.inactiveRow td {
+  color: #6f7d86;
 }
 
 /* ─── Validation Error State ────────────────────────── */

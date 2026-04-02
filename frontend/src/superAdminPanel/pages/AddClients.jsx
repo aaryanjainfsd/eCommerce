@@ -3,7 +3,8 @@ import {
     addClient,
     adminAuthCredentials,
     getAllClients,
-    removeClient,
+    permanentlyDeleteClient,
+    toggleClientStatus,
 } from "../../shared/apis/services/client.service.jsx";
 import styles from "../assets/css/clientManager.module.css";
 
@@ -26,8 +27,7 @@ const categoryLabelMap = {
 };
 
 const EMAIL_REGEX = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
-const URL_REGEX =
-    /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)$/;
+const URL_REGEX = /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)$/;
 const VALID_STATUSES = ["Active", "Onboarding", "Inactive"];
 const VALID_CATEGORIES = ["starter", "premium", "luxury"];
 
@@ -89,7 +89,8 @@ function SuperClients() {
     const [touched, setTouched] = useState({});
     const [clients, setClients] = useState([]);
     const [isLoadingClients, setIsLoadingClients] = useState(false);
-    const [removingClientId, setRemovingClientId] = useState("");
+    const [statusUpdatingClientId, setStatusUpdatingClientId] = useState("");
+    const [deletingClientId, setDeletingClientId] = useState("");
     const [clientsError, setClientsError] = useState("");
 
     async function fetchClientsFromDatabase() {
@@ -115,6 +116,15 @@ function SuperClients() {
 
     function getCategoryLabel(category) {
         return categoryLabelMap[category] || category || "-";
+    }
+
+    function isClientInactive(statusValue) {
+        const normalizedStatus =
+            typeof statusValue === "string"
+                ? statusValue.trim().toLowerCase()
+                : "";
+
+        return normalizedStatus === "inactive";
     }
 
     function handleInputChange(event) {
@@ -213,21 +223,62 @@ function SuperClients() {
         }
     }
 
-    async function handleRemoveClient(clientId) {
+    async function handleToggleClientStatus(client) {
+        const clientId = client._id || client.id;
+
         try {
             setClientsError("");
-            setRemovingClientId(clientId);
-            await removeClient(clientId);
-            setClients((prevItemsBunch) =>
-                prevItemsBunch.filter(
-                    (bunchItem) => (bunchItem._id || bunchItem.id) !== clientId,
+            setStatusUpdatingClientId(clientId);
+            const response = await toggleClientStatus(clientId);
+            const updatedStatus = response?.data?.client?.status;
+
+            setClients((prevClients) =>
+                prevClients.map((item) =>
+                    (item._id || item.id) === clientId
+                        ? {
+                              ...item,
+                              status:
+                                  updatedStatus ||
+                                  (isClientInactive(item.status)
+                                      ? "Active"
+                                      : "Inactive"),
+                          }
+                        : item,
                 ),
             );
         } catch (error) {
-            const errorMessage = error?.message || "Failed to remove client.";
+            const errorMessage =
+                error?.message || "Failed to update client status.";
             setClientsError(errorMessage);
         } finally {
-            setRemovingClientId("");
+            setStatusUpdatingClientId("");
+        }
+    }
+
+    async function handlePermanentDeleteClient(client) {
+        const clientId = client._id || client.id;
+        const businessLabel =
+            client.businessName || client.clientName || "this client";
+
+        const shouldDelete = window.confirm(
+            `Permanently delete ${businessLabel}? This action cannot be undone.`,
+        );
+
+        if (!shouldDelete) return;
+
+        try {
+            setClientsError("");
+            setDeletingClientId(clientId);
+            await permanentlyDeleteClient(clientId);
+            setClients((prevClients) =>
+                prevClients.filter((item) => (item._id || item.id) !== clientId),
+            );
+        } catch (error) {
+            const errorMessage =
+                error?.message || "Failed to permanently delete client.";
+            setClientsError(errorMessage);
+        } finally {
+            setDeletingClientId("");
         }
     }
 
@@ -501,6 +552,11 @@ function SuperClients() {
                                             client.email ||
                                             index
                                         }
+                                        className={
+                                            isClientInactive(client.status)
+                                                ? styles.inactiveRow
+                                                : ""
+                                        }
                                     >
                                         <td>{client.clientName}</td>
                                         <td>{client.businessName}</td>
@@ -515,34 +571,51 @@ function SuperClients() {
                                             <div className={styles.actionRow}>
                                                 <button
                                                     type="button"
-                                                    className={
-                                                        styles.editButton
-                                                    }
-                                                >
-                                                    {" "}
-                                                    Edit{" "}
-                                                </button>
-                                                <button
-                                                    type="button"
-                                                    className={
-                                                        styles.deleteButton
-                                                    }
+                                                    className={styles.toggleButton}
                                                     onClick={() =>
-                                                        handleRemoveClient(
-                                                            client._id ||
-                                                                client.id,
+                                                        handleToggleClientStatus(
+                                                            client,
                                                         )
                                                     }
                                                     disabled={
-                                                        removingClientId ===
-                                                        (client._id ||
-                                                            client.id)
+                                                        statusUpdatingClientId ===
+                                                            (client._id ||
+                                                                client.id) ||
+                                                        deletingClientId ===
+                                                            (client._id ||
+                                                                client.id)
                                                     }
                                                 >
-                                                    {removingClientId ===
+                                                    {statusUpdatingClientId ===
                                                     (client._id || client.id)
-                                                        ? "Removing..."
-                                                        : "Remove"}
+                                                        ? "Updating..."
+                                                        : isClientInactive(
+                                                                client.status,
+                                                            )
+                                                          ? "Activate"
+                                                          : "Deactivate"}
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    className={styles.deleteButton}
+                                                    onClick={() =>
+                                                        handlePermanentDeleteClient(
+                                                            client,
+                                                        )
+                                                    }
+                                                    disabled={
+                                                        deletingClientId ===
+                                                            (client._id ||
+                                                                client.id) ||
+                                                        statusUpdatingClientId ===
+                                                            (client._id ||
+                                                                client.id)
+                                                    }
+                                                >
+                                                    {deletingClientId ===
+                                                    (client._id || client.id)
+                                                        ? "Deleting..."
+                                                        : "Permanently Delete"}
                                                 </button>
                                             </div>
                                         </td>

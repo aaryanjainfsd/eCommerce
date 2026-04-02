@@ -105,7 +105,7 @@ function AdminLogin() {
                 username: response.data.user.username,
                 role: response.data.user.role
             });
-            navigate("/admin/dashboard");
+            navigate("/adminPanel/dashboard");
         }
         catch (error) {
             const msg = error?.response?.data?.message || "Login failed. Your secret credentials are incorrect.";
