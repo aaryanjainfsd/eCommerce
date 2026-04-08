@@ -33,7 +33,7 @@ const useAdminAuthStore = create(
 				// no user is logged in yet.
 				user: {
 					username: null,
-					role: null
+					client_id: null
 				},
 
 
@@ -56,7 +56,7 @@ const useAdminAuthStore = create(
 						isLoggedIn: false,
 						user: {
 							username: null,
-							role: null
+							client_id: null
 						}
 					});
 				}
@@ -84,10 +84,8 @@ const useAdminAuthStore = create(
 				// If the store later contains other properties
 				// they will NOT be persisted.
 				return {
-
 					isLoggedIn: state.isLoggedIn,
 					user: state.user
-
 				};
 			}
 		}

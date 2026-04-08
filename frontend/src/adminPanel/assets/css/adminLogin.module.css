@@ -604,3 +604,63 @@ html,
     font-size: 11px;
   }
 }
+
+/* Add extra space on the right side of the password input for the eye button. */
+.passwordInput {
+  /* Keep text from going under the eye icon. */
+  padding-right: 48px;
+}
+
+/* Style the eye toggle button inside the password field. */
+.eyeButton {
+  /* Place the button inside the input box on the right side. */
+  position: absolute;
+
+  /* Keep the button aligned to the right. */
+  right: 12px;
+
+  /* Center the button vertically inside the input field. */
+  top: 50%;
+
+  /* Move the button up by half of its own height for perfect centering. */
+  transform: translateY(-50%);
+
+  /* Remove the default browser button background. */
+  background: transparent;
+
+  /* Remove the default browser border. */
+  border: none;
+
+  /* Use a pointer cursor so the user knows it is clickable. */
+  cursor: pointer;
+
+  /* Use a soft color that matches your form theme. */
+  color: #a8b5c4;
+
+  /* Keep the button centered nicely. */
+  display: flex;
+
+  /* Align the icon vertically. */
+  align-items: center;
+
+  /* Align the icon horizontally. */
+  justify-content: center;
+
+  /* Remove extra default padding. */
+  padding: 0;
+}
+
+/* Change the eye color slightly when the user hovers over it. */
+.eyeButton:hover {
+  /* Make the icon brighter on hover. */
+  color: #ffffff;
+}
+
+/* Style the eye button when the password field is disabled. */
+.eyeButton:disabled {
+  /* Reduce opacity to show it is inactive. */
+  opacity: 0.5;
+
+  /* Show the not-allowed cursor when disabled. */
+  cursor: not-allowed;
+}

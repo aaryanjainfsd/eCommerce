@@ -1,0 +1,211 @@
+.page {
+  min-height: calc(100vh - 104px);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: linear-gradient(145deg, rgba(30, 41, 59, 0.35) 0%, rgba(15, 23, 42, 0.45) 100%);
+  box-shadow: 0 16px 36px rgba(2, 6, 23, 0.22);
+  padding: 20px;
+  color: #e2e8f0;
+}
+
+.pageHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.title {
+  margin: 0;
+  font-size: 30px;
+  color: #dce9ff;
+}
+
+.subtitle {
+  margin: 8px 0 0;
+  color: #94a3b8;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.statusBadge {
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(91, 124, 255, 0.16);
+  border: 1px solid rgba(91, 124, 255, 0.32);
+  color: #dce9ff;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.heroGrid {
+  margin-top: 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 14px;
+}
+
+.sectionGrid {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
+  gap: 14px;
+}
+
+.card {
+  padding: 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  background: rgba(15, 23, 42, 0.45);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.02);
+}
+
+.eyebrow {
+  margin: 0 0 6px;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #8fb8ff;
+}
+
+.name {
+  margin: 0;
+  color: #f8fbff;
+  font-size: 24px;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.meta {
+  margin: 8px 0 0;
+  color: #94a3b8;
+  overflow-wrap: anywhere;
+}
+
+.quickList {
+  display: grid;
+  gap: 8px;
+  color: #e2e8f0;
+}
+
+.quickList span {
+  overflow-wrap: anywhere;
+}
+
+.cardTitle {
+  margin: 0 0 14px;
+  color: #dce9ff;
+  font-size: 17px;
+}
+
+.detailsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.detailItem {
+  padding: 12px;
+  border-radius: 12px;
+  background: rgba(148, 163, 184, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.detailLabel {
+  margin: 0 0 6px;
+  font-size: 12px;
+  color: #8fb8ff;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  line-height: 1.4;
+}
+
+.detailValue {
+  margin: 0;
+  color: #e2e8f0;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.detailLink {
+  color: #7dd3fc;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+
+.detailLink:hover {
+  text-decoration: underline;
+}
+
+.input {
+  width: 100%;
+  margin-top: 4px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(15, 23, 42, 0.72);
+  color: #e2e8f0;
+  outline: none;
+  font-size: 14px;
+}
+
+.hint {
+  margin: 8px 0 0;
+  color: #94a3b8;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+@media (max-width: 1024px) {
+  .sectionGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .page {
+    padding: 16px;
+  }
+
+  .title {
+    font-size: 26px;
+  }
+
+  .heroGrid,
+  .detailsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .card {
+    padding: 14px;
+  }
+
+  .name {
+    font-size: 21px;
+  }
+}
+
+@media (max-width: 480px) {
+  .page {
+    padding: 14px;
+    border-radius: 12px;
+  }
+
+  .pageHeader {
+    gap: 10px;
+  }
+
+  .statusBadge {
+    font-size: 12px;
+  }
+
+  .detailItem {
+    padding: 10px;
+  }
+
+  .input {
+    font-size: 13px;
+  }
+}

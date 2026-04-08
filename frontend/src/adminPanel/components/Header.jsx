@@ -27,6 +27,11 @@ const notifications = [
 function Header({ onMobileMenuToggle }) {
     const navigate = useNavigate();
     const { user, setLoggedOut } = useAdminAuthStore();
+    const userDetails = user?.client_id || {};
+
+    const handleProfile = () => {
+        navigate("/adminPanel/profile");
+    };
 
     const handleLogout = () => {
         setLoggedOut();
@@ -40,12 +45,7 @@ function Header({ onMobileMenuToggle }) {
     return (
         <header className={styles.header}>
             <div className={styles.left}>
-                <button
-                    type="button"
-                    className={styles.mobileMenuBtn}
-                    onClick={onMobileMenuToggle}
-                    aria-label="Toggle sidebar"
-                >
+                <button type="button" className={styles.mobileMenuBtn} onClick={onMobileMenuToggle} aria-label="Toggle sidebar" >
                     <Menu size={20} />
                 </button>
                 <div className={styles.brand}>
@@ -76,9 +76,13 @@ function Header({ onMobileMenuToggle }) {
                 <div className={styles.profileWrapper}>
                     <button type="button" className={styles.profileButton}>
                         <User size={18} />
-                        <span className={styles.welcome}>{user?.username || "Admin"}</span>
+                        <span className={styles.welcome}>{userDetails?.clientName|| "Admin"}</span>
                     </button>
                     <div className={styles.profileDropdown}>
+                        <button type="button" className={styles.dropdownItem} onClick={handleProfile}>
+                            <User size={16} />
+                            <span>Profile</span>
+                        </button>
                         <button type="button" className={styles.dropdownItem} onClick={handleSettings}>
                             <Settings size={16} />
                             <span>Settings</span>

@@ -4,10 +4,10 @@ import { Schema, model } from "mongoose";
 const clientSchema = new Schema(
     {
         clientName      : { type: String, required: true },
-        businessName    : { type: String, required: true },
+        businessName    : { type: String, required: true, unique: true },
         websiteURL      : { type: String },
         email           : { type: String, required: true, unique: true },
-        phone           : { type: String, required: true },
+        phone           : { type: String, required: true, unique: true },
         status          : { type: String },
         category        : { type: String }
     },

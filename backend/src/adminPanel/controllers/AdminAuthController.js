@@ -3,7 +3,6 @@ import bcrypt from 'bcryptjs';
 import { isValidObjectId } from "mongoose";
 import AdminAuthModel from '../models/AdminAuth.model.js';
 import ClientModel from '../../shared/models/Client.model.js';
-import productRouter from "../../storeFront/routes/ProductRouter.js";
 
 
 export async function registerFunction(req, res) {
@@ -66,9 +65,12 @@ export async function registerFunction(req, res) {
 export async function loginFunction(req, res) {
     try {
         const { username, password } = req.body;
-        console.log("Received login request with body:", req.body);
-        const user = await AdminAuthModel.findOne({ "data.username": username });
-        console.log("Found user:", user);
+        const user = await AdminAuthModel.findOne({ "data.username": username })
+        .populate({
+            path: "foreignKeys.client_id",
+            select: "clientName businessName websiteURL email phone status category"
+        });
+        
         if (!user) {
             return res.status(404).json({ message: "Invalid username or password" });
         }
@@ -103,7 +105,9 @@ export async function loginFunction(req, res) {
 
                 return res.status(200).json({
                     message: "Admin login successful",
-                    user: user
+                    user: {
+                        client_id: user.foreignKeys.client_id
+                    }
                 });
             }
         }

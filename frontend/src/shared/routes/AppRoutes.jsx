@@ -18,6 +18,7 @@ import ProductDetails from "../../storeFront/pages/ProductDetails";
 import AdminOutlet from "../../adminPanel/components/AdminOutlet";
 import AdminLogin from "../../adminPanel/pages/AdminLogin";
 import Dashboard from "../../adminPanel/pages/Dashboard";
+import AdminProfile from "../../adminPanel/pages/AdminProfile";
 
 // ==================== SUPER ADMIN IMPORTS ====================
 import SuperAdminPanelOutlet from "../../superAdminPanel/components/SuperAdminPanelOutlet.jsx";
@@ -51,6 +52,7 @@ const storeFrontChildren = [
 const adminChildren = [
     { index: true, element: <AdminLogin />},
     { path: "dashboard", element: ( <AdminProtectedRoute> <Dashboard /> </AdminProtectedRoute>),},
+    { path: "profile", element: ( <AdminProtectedRoute> <AdminProfile /> </AdminProtectedRoute>),},
 ];
 
 const superAdminPanelChildren = [

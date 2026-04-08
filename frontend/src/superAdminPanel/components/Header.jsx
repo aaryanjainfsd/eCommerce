@@ -23,16 +23,19 @@ function Header() {
     }, []);
 
     async function handleLogout() {
-        try {
+        try 
+        {
             await SuperAdminLogoutAPI();
-        } catch (_) {
-            // proceed with local logout even if server call fails
+        } 
+        catch (error) 
+        {
+            console.error("Logout failed:", error);
         }
         setLoggedOut();
         navigate("/superAdminPanel");
     }
 
-    return (
+    return(
         <header className={styles.header}>
             <div className={styles.compactRow}>
                 <div className={styles.brandInline}>

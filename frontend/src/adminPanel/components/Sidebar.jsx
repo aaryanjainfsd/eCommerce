@@ -25,18 +25,22 @@ function Sidebar({ collapsed, onToggleCollapsed, mobileOpen, onCloseMobile }) {
                     <button
                         type="button"
                         className={styles.sidebarToggle}
-                        onClick={onToggleCollapsed}
-                        aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+                        onClick={mobileOpen ? onCloseMobile : onToggleCollapsed}
+                        aria-label={
+                            mobileOpen
+                                ? "Close sidebar"
+                                : collapsed
+                                  ? "Expand sidebar"
+                                  : "Collapse sidebar"
+                        }
                     >
-                        {collapsed ? <ChevronsRight size={18} /> : <ChevronsLeft size={18} />}
-                    </button>
-                    <button
-                        type="button"
-                        className={styles.sidebarCloseMobile}
-                        onClick={onCloseMobile}
-                        aria-label="Close sidebar"
-                    >
-                        <X size={18} />
+                        {mobileOpen ? (
+                            <ChevronsLeft size={18} />
+                        ) : collapsed ? (
+                            <ChevronsRight size={18} />
+                        ) : (
+                            <ChevronsLeft size={18} />
+                        )}
                     </button>
                 </div>
 

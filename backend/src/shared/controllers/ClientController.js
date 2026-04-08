@@ -3,7 +3,7 @@ import AdminAuthModel from '../../adminPanel/models/AdminAuth.model.js';
 import bcrypt from 'bcryptjs';
 
 
-export async function createClient(req, res){
+export async function createClient(req, res) {
     try {
         const { clientName, businessName, websiteURL, email, phone, status, category } = req.body;
 
@@ -11,22 +11,40 @@ export async function createClient(req, res){
             return res.status(400).json({ message: "Missing required client fields" });
         }
 
-        const existing = await ClientModel.findOne({ email });
-
+        // Check for existing email, phone, or businessName
+        const existing = await ClientModel.findOne({
+            $or: [
+                { email },
+                { phone },
+                { businessName }
+            ]
+        });
         if (existing) {
-            return res.status(409).json({ message: "Client with this email already exists" });
-        } else {
+            let conflictField = "email";
+            if (existing.email === email) conflictField = "email";
+            else if (existing.phone === phone) conflictField = "phone";
+            else if (existing.businessName === businessName) conflictField = "businessName";
+            return res.status(409).json({ message: `Client with this ${conflictField} already exists` });
+        }
+
+        try {
             const newClient = await ClientModel.create({
                 clientName,
                 businessName,
                 websiteURL,
                 email,
                 phone,
-                status: status,
-                category: category
+                status,
+                category
             });
-
-            res.status(201).json(newClient);
+            return res.status(201).json(newClient);
+        } catch (err) {
+            // Handle duplicate key error from MongoDB
+            if (err.code === 11000) {
+                const dupField = Object.keys(err.keyPattern)[0];
+                return res.status(409).json({ message: `Client with this ${dupField} already exists` });
+            }
+            throw err;
         }
     } catch (error) {
         res.status(500).json({ message: "Internal server error", error: error.message });
@@ -145,11 +163,7 @@ export async function toggleClientStatus(req, res)
             return res.status(404).json({ message: "Client not found" });
         }
 
-        const currentStatus =
-            typeof existingClient.status === "string"
-                ? existingClient.status.trim()
-                : "";
-
+        const currentStatus = typeof existingClient.status === "string" ? existingClient.status.trim() : "";
         const nextStatus = currentStatus === "Inactive" ? "Active" : "Inactive";
 
         existingClient.status = nextStatus;

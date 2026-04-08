@@ -27,7 +27,8 @@ const categoryLabelMap = {
 };
 
 const EMAIL_REGEX = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
-const URL_REGEX = /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)$/;
+const URL_REGEX =
+    /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)$/;
 const VALID_STATUSES = ["Active", "Onboarding", "Inactive"];
 const VALID_CATEGORIES = ["starter", "premium", "luxury"];
 
@@ -92,6 +93,14 @@ function SuperClients() {
     const [statusUpdatingClientId, setStatusUpdatingClientId] = useState("");
     const [deletingClientId, setDeletingClientId] = useState("");
     const [clientsError, setClientsError] = useState("");
+    const [popup, setPopup] = useState({
+        isOpen: false, // controls whether popup is visible
+        type: "", // "delete" or "success"
+        message: "", // text to show inside popup
+        client: null, // stores selected client for delete
+    });
+    const [selectedClientIds, setSelectedClientIds] = useState([]);
+    const [isBulkDeleting, setIsBulkDeleting] = useState(false);
 
     async function fetchClientsFromDatabase() {
         try {
@@ -102,6 +111,7 @@ function SuperClients() {
                 (client) => client.status !== 0 && client.status !== "0",
             );
             setClients(visibleClients);
+            setSelectedClientIds([]);
         } catch (error) {
             const errorMessage = error?.message || "Failed to load clients.";
             setClientsError(errorMessage);
@@ -113,6 +123,50 @@ function SuperClients() {
     useEffect(() => {
         fetchClientsFromDatabase();
     }, []);
+
+    function closePopup() {
+        setPopup({
+            isOpen: false,
+            type: "",
+            message: "",
+            client: null,
+        });
+    }
+
+    useEffect(() => {
+        if (!popup.isOpen || popup.type !== "success") return;
+
+        const timerId = window.setTimeout(() => {
+            setPopup({
+                isOpen: false,
+                type: "",
+                message: "",
+                client: null,
+            });
+        }, 2500);
+
+        return () => window.clearTimeout(timerId);
+    }, [popup.isOpen, popup.type]);
+
+    function handleSelectClient(clientId, checkedStatus) {
+        setSelectedClientIds((prevItems) => {
+            if (checkedStatus) {
+                return [...prevItems, clientId];
+            } else {
+                return prevItems.filter((id) => id !== clientId);
+            }
+        });
+    }
+
+    function handleSelectAllClients(isChecked) {
+        if (isChecked) {
+            const allClientIds = clients.map((client) => client._id);
+
+            setSelectedClientIds(allClientIds);
+        } else {
+            setSelectedClientIds([]);
+        }
+    }
 
     function getCategoryLabel(category) {
         return categoryLabelMap[category] || category || "-";
@@ -169,9 +223,6 @@ function SuperClients() {
     }
 
     async function handleSubmit(event) {
-        // console.log(errors);
-        // console.log(touched);
-
         event.preventDefault();
 
         const allTouched = Object.keys(emptyForm).reduce(
@@ -186,7 +237,6 @@ function SuperClients() {
         try {
             const autoUsername = formData.businessName;
             const autoPassword = formData.phone;
-
             const clientPayload = {
                 clientName: formData.clientName,
                 businessName: formData.businessName,
@@ -197,34 +247,39 @@ function SuperClients() {
                 category: formData.category,
             };
             const addClientResponse = await addClient(clientPayload);
-
-            console.log("Client added successfully:", addClientResponse.data);
-
             const loginPayload = {
                 client_id: addClientResponse.data._id, // use the real client ID returned from the backend
                 username: autoUsername,
                 password: autoPassword,
             };
 
-            console.log(
-                "Attempting to add admin credentials with payload:",
-                loginPayload,
-            );
             const adminAuthResponse = await adminAuthCredentials(loginPayload);
-            console.log(
-                "Admin auth credentials added successfully:",
-                adminAuthResponse.data,
-            );
+            setPopup({
+                isOpen: true,
+                type: "success",
+                message: "Client added successfully!",
+                client: null,
+            });
 
             resetForm(); // clear the form so the user can add another client
             fetchClientsFromDatabase(); // refresh table with latest DB state
         } catch (error) {
-            console.error("Failed to add client:", error);
+            if (error?.message?.toLowerCase().includes("email")) {
+                setErrors((prev) => ({ ...prev, email: error.message }));
+            } else if (error?.message?.toLowerCase().includes("phone")) {
+                setErrors((prev) => ({ ...prev, phone: error.message }));
+            } else if (error?.message?.toLowerCase().includes("businessname")) {
+                setErrors((prev) => ({ ...prev, businessName: error.message }));
+            } else {
+                const errorMessage =
+                    error?.message || "Failed to add client. Please try again.";
+                setClientsError(errorMessage);
+            }
         }
     }
 
     async function handleToggleClientStatus(client) {
-        const clientId = client._id || client.id;
+        const clientId = client._id;
 
         try {
             setClientsError("");
@@ -234,7 +289,7 @@ function SuperClients() {
 
             setClients((prevClients) =>
                 prevClients.map((item) =>
-                    (item._id || item.id) === clientId
+                    item._id === clientId
                         ? {
                               ...item,
                               status:
@@ -255,23 +310,27 @@ function SuperClients() {
         }
     }
 
-    async function handlePermanentDeleteClient(client) {
+    async function handlePermanentDeleteClient(client, skipConfirm = false) {
         const clientId = client._id || client.id;
-        const businessLabel =
-            client.businessName || client.clientName || "this client";
 
-        const shouldDelete = window.confirm(
-            `Permanently delete ${businessLabel}? This action cannot be undone.`,
-        );
-
-        if (!shouldDelete) return;
+        if (!skipConfirm) {
+            setPopup({
+                isOpen: true,
+                type: "delete",
+                message: "",
+                client,
+            });
+            return;
+        }
 
         try {
             setClientsError("");
             setDeletingClientId(clientId);
             await permanentlyDeleteClient(clientId);
             setClients((prevClients) =>
-                prevClients.filter((item) => (item._id || item.id) !== clientId),
+                prevClients.filter(
+                    (item) => (item._id || item.id) !== clientId,
+                ),
             );
         } catch (error) {
             const errorMessage =
@@ -279,6 +338,58 @@ function SuperClients() {
             setClientsError(errorMessage);
         } finally {
             setDeletingClientId("");
+        }
+    }
+
+    async function handleDeleteAllSelectedClients() {
+        try {
+            setClientsError("");
+            setIsBulkDeleting(true);
+
+            const results = await Promise.allSettled(
+                selectedClientIds.map((clientId) =>
+                    permanentlyDeleteClient(clientId),
+                ),
+            );
+
+            const deletedIds = results
+                .map((result, index) =>
+                    result.status === "fulfilled"
+                        ? selectedClientIds[index]
+                        : null,
+                )
+                .filter(Boolean);
+
+            setClients((prevItems) =>
+                prevItems.filter(
+                    (client) => !deletedIds.includes(client._id || client.id),
+                ),
+            );
+
+            setSelectedClientIds([]);
+
+            if (deletedIds.length > 0) {
+                setPopup({
+                    isOpen: true,
+                    type: "success",
+                    message: `${deletedIds.length} client(s) deleted successfully!`,
+                    client: null,
+                });
+            }
+
+            const failedCount = results.length - deletedIds.length;
+            if (failedCount > 0) {
+                setClientsError(
+                    `${failedCount} selected client(s) could not be deleted.`,
+                );
+            }
+        } catch (error) {
+            setClientsError(
+                error?.message ||
+                    "Failed to delete selected clients. Please try again.",
+            );
+        } finally {
+            setIsBulkDeleting(false);
         }
     }
 
@@ -510,7 +621,23 @@ function SuperClients() {
             </div>
 
             <div className={styles.card}>
-                <h2 className={styles.title}>Added Clients</h2>
+                <div className={styles.listHeader}>
+                    <h2 className={styles.title}>Client List</h2>
+
+                    <div className={styles.topActionButtons}>
+                        {selectedClientIds.length > 1 && (
+                            <button
+                                type="button"
+                                className={styles.bulkDeleteButton}
+                                onClick={handleDeleteAllSelectedClients}
+                                disabled={isBulkDeleting}
+                            >
+                                {" "}
+                                Delete All Selected{" "}
+                            </button>
+                        )}
+                    </div>
+                </div>
 
                 {clientsError && (
                     <p className={styles.emptyState}>{clientsError}</p>
@@ -523,6 +650,22 @@ function SuperClients() {
                     <table className={styles.table}>
                         <thead>
                             <tr>
+                                <th>
+                                    <input
+                                        type="checkbox"
+                                        className={styles.rowCheckbox}
+                                        checked={
+                                            clients.length > 0 &&
+                                            selectedClientIds.length ===
+                                                clients.length
+                                        }
+                                        onChange={(e) =>
+                                            handleSelectAllClients(
+                                                e.target.checked,
+                                            )
+                                        }
+                                    />
+                                </th>
                                 <th>Client Name</th>
                                 <th>Business Name</th>
                                 <th>Phone</th>
@@ -537,27 +680,38 @@ function SuperClients() {
                             {clients.length === 0 ? (
                                 <tr>
                                     <td
-                                        colSpan="8"
+                                        colSpan="9"
                                         className={styles.emptyState}
                                     >
-                                        No clients added yet.
+                                        {" "}
+                                        No clients added yet.{" "}
                                     </td>
                                 </tr>
                             ) : (
                                 clients.map((client, index) => (
                                     <tr
-                                        key={
-                                            client._id ||
-                                            client.id ||
-                                            client.email ||
-                                            index
-                                        }
+                                        key={client._id}
                                         className={
                                             isClientInactive(client.status)
                                                 ? styles.inactiveRow
                                                 : ""
                                         }
                                     >
+                                        <td>
+                                            <input
+                                                type="checkbox"
+                                                className={styles.rowCheckbox}
+                                                checked={selectedClientIds.includes(
+                                                    client._id,
+                                                )}
+                                                onChange={(e) =>
+                                                    handleSelectClient(
+                                                        client._id,
+                                                        e.target.checked,
+                                                    )
+                                                }
+                                            />
+                                        </td>
                                         <td>{client.clientName}</td>
                                         <td>{client.businessName}</td>
                                         <td>{client.phone}</td>
@@ -565,13 +719,18 @@ function SuperClients() {
                                         <td>{client.password || "-"}</td>
                                         <td>{client.status}</td>
                                         <td>
-                                            {getCategoryLabel(client.category)}
+                                            {" "}
+                                            {getCategoryLabel(
+                                                client.category,
+                                            )}{" "}
                                         </td>
                                         <td>
                                             <div className={styles.actionRow}>
                                                 <button
                                                     type="button"
-                                                    className={styles.toggleButton}
+                                                    className={
+                                                        styles.toggleButton
+                                                    }
                                                     onClick={() =>
                                                         handleToggleClientStatus(
                                                             client,
@@ -579,15 +738,11 @@ function SuperClients() {
                                                     }
                                                     disabled={
                                                         statusUpdatingClientId ===
-                                                            (client._id ||
-                                                                client.id) ||
-                                                        deletingClientId ===
-                                                            (client._id ||
-                                                                client.id)
+                                                        client._id
                                                     }
                                                 >
                                                     {statusUpdatingClientId ===
-                                                    (client._id || client.id)
+                                                    client._id
                                                         ? "Updating..."
                                                         : isClientInactive(
                                                                 client.status,
@@ -597,7 +752,9 @@ function SuperClients() {
                                                 </button>
                                                 <button
                                                     type="button"
-                                                    className={styles.deleteButton}
+                                                    className={
+                                                        styles.deleteButton
+                                                    }
                                                     onClick={() =>
                                                         handlePermanentDeleteClient(
                                                             client,
@@ -626,6 +783,76 @@ function SuperClients() {
                     </table>
                 </div>
             </div>
+
+            {popup.isOpen && (
+                <div className={styles.popupOverlay}>
+                    <div
+                        className={
+                            `${styles.popupBox} ` +
+                            (popup.type === "success"
+                                ? styles.popupSuccess
+                                : popup.type === "delete"
+                                  ? styles.popupDelete
+                                  : "")
+                        }
+                    >
+                        {/* If popup type is delete, show delete confirmation heading */}
+                        {popup.type === "delete" && <h3>Delete Client?</h3>}
+
+                        {/* If popup type is success, show success heading */}
+                        {popup.type === "success" && <h3>Success</h3>}
+
+                        {/* Common popup message */}
+                        <p>
+                            {popup.type === "delete"
+                                ? `Are you sure you want to permanently delete ${
+                                      popup.client?.businessName ||
+                                      popup.client?.clientName
+                                  }? This action cannot be undone.`
+                                : popup.message}
+                        </p>
+
+                        {popup.type === "success" && (
+                            <div className={styles.popupActions}>
+                                <button
+                                    type="button"
+                                    className={styles.cancelButton}
+                                    onClick={closePopup}
+                                >
+                                    OK
+                                </button>
+                            </div>
+                        )}
+
+                        {popup.type === "delete" && (
+                            <div className={styles.popupActions}>
+                                <button
+                                    type="button"
+                                    className={styles.cancelButton}
+                                    onClick={closePopup}
+                                >
+                                    No
+                                </button>
+
+                                <button
+                                    type="button"
+                                    className={styles.confirmDeleteButton}
+                                    onClick={() => {
+                                        const selectedClient = popup.client;
+                                        closePopup();
+                                        handlePermanentDeleteClient(
+                                            selectedClient,
+                                            true,
+                                        );
+                                    }}
+                                >
+                                    Yes, Delete
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
         </section>
     );
 }

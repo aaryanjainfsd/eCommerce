@@ -1,0 +1,184 @@
+.dashboardPage {
+  min-height: calc(100vh - 104px);
+  border-radius: 16px;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  background:
+    radial-gradient(circle at top right, rgba(47, 183, 255, 0.16) 0%, transparent 38%),
+    radial-gradient(circle at bottom left, rgba(91, 124, 255, 0.14) 0%, transparent 42%),
+    linear-gradient(145deg, rgba(15, 23, 42, 0.78) 0%, rgba(10, 15, 30, 0.88) 100%);
+  box-shadow: 0 20px 42px rgba(2, 6, 23, 0.4);
+  padding: 24px;
+  color: #f1f5f9;
+}
+
+.dashboardTitle {
+  margin: 0;
+  font-size: 34px;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+  color: #f8fbff;
+  text-shadow: 0 2px 12px rgba(47, 183, 255, 0.22);
+}
+
+.dashboardSubtitle {
+  margin: 10px 0 0;
+  color: #d1ddef;
+  font-size: 16px;
+  line-height: 1.45;
+}
+
+.welcomePanel {
+  position: relative;
+  overflow: hidden;
+  margin-top: 20px;
+  padding: 22px;
+  border-radius: 16px;
+  border: 1px solid rgba(125, 211, 252, 0.32);
+  background: linear-gradient(120deg, rgba(59, 130, 246, 0.3) 0%, rgba(30, 64, 175, 0.2) 45%, rgba(15, 23, 42, 0.62) 100%);
+  box-shadow: inset 0 0 0 1px rgba(191, 219, 254, 0.16), 0 14px 30px rgba(15, 23, 42, 0.42);
+}
+
+.welcomePanel::after {
+  content: "";
+  position: absolute;
+  top: -55px;
+  right: -30px;
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(186, 230, 253, 0.3) 0%, transparent 72%);
+  pointer-events: none;
+}
+
+.welcomeTitle {
+  margin: 0;
+  color: #ffffff;
+  font-size: 29px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.welcomeMessage {
+  margin: 12px 0 0;
+  color: #eef6ff;
+  font-size: 17px;
+  line-height: 1.55;
+  max-width: 900px;
+  text-wrap: balance;
+}
+
+.welcomeBusiness {
+  color: #e0f2fe;
+  font-weight: 800;
+  background: rgba(15, 23, 42, 0.46);
+  border: 1px solid rgba(191, 219, 254, 0.35);
+  padding: 2px 10px;
+  border-radius: 999px;
+}
+
+.dashboardGrid {
+  margin-top: 22px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.dashboardCard {
+  min-height: 156px;
+  padding: 18px;
+  border-radius: 14px;
+  border: 1px solid rgba(203, 213, 225, 0.22);
+  background: linear-gradient(145deg, rgba(15, 23, 42, 0.72) 0%, rgba(30, 41, 59, 0.52) 100%);
+  box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.12), 0 10px 22px rgba(2, 6, 23, 0.32);
+}
+
+.dashboardCard:nth-child(1) {
+  border-top: 2px solid rgba(91, 124, 255, 0.7);
+}
+
+.dashboardCard:nth-child(2) {
+  border-top: 2px solid rgba(47, 183, 255, 0.7);
+}
+
+.dashboardCard:nth-child(3) {
+  border-top: 2px solid rgba(16, 185, 129, 0.7);
+}
+
+.dashboardCard h3 {
+  margin: 0;
+  color: #f8fbff;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.dashboardCard p {
+  margin: 8px 0 0;
+  color: #d1ddef;
+}
+
+.metricValue {
+  margin: 16px 0 0;
+  font-size: 44px;
+  line-height: 1;
+  font-weight: 900;
+  letter-spacing: 0.4px;
+  color: #ffffff;
+  text-shadow: 0 2px 16px rgba(47, 183, 255, 0.3);
+}
+
+.metricHint {
+  margin: 12px 0 0;
+  color: #d8e4f5;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+@media (max-width: 1024px) {
+  .dashboardTitle {
+    font-size: 30px;
+  }
+
+  .welcomeTitle {
+    font-size: 25px;
+  }
+
+  .welcomeMessage {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboardPage {
+    padding: 16px;
+  }
+
+  .dashboardTitle {
+    font-size: 26px;
+  }
+
+  .dashboardSubtitle {
+    font-size: 15px;
+  }
+
+  .welcomePanel {
+    padding: 18px;
+  }
+
+  .welcomeTitle {
+    font-size: 22px;
+  }
+
+  .welcomeMessage {
+    font-size: 15px;
+  }
+
+  .metricValue {
+    font-size: 38px;
+  }
+
+  .dashboardGrid {
+    grid-template-columns: 1fr;
+  }
+}

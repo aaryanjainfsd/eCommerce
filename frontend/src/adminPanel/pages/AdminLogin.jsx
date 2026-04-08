@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback, useRef } from "react";
-import styles from '../assets/css/adminLogin.module.css';
+import { Eye, EyeOff } from "lucide-react";
+import styles from "../assets/css/adminLogin.module.css";
 import { useNavigate } from "react-router-dom";
 import useAdminAuthStore from "../stores/adminAuthStore";
 import { loginUserAPI, verifyUsernameAPI } from "../apis/services/adminAuth";
@@ -7,22 +8,26 @@ import { loginUserAPI, verifyUsernameAPI } from "../apis/services/adminAuth";
 function AdminLogin() {
     // Form data state
     const [data, setData] = useState({ username: "", password: "" });
-    
+
     // Username validation state
     const [usernameStatus, setUsernameStatus] = useState(null); // null, 'validating', 'verified', 'invalid'
     const [userInfo, setUserInfo] = useState(null); // Stores verified user info
-    
+
     // Login submission state
     const [isError, setIsError] = useState(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
-    
+
+    const [showPassword, setShowPassword] = useState(false);
+    const passwordInputType = showPassword ? "text" : "password";
+    const passwordLabelToggle = showPassword
+        ? "Hide Password"
+        : "Show Password";
+
     // Debounce timer reference for username validation
     const debounceTimerRef = useRef(null);
-    
+
     const navigate = useNavigate();
     const { setUser } = useAdminAuthStore();
-
-    
 
     /**
      * Debounced username validation function
@@ -43,7 +48,7 @@ function AdminLogin() {
         }
 
         // Set loading state
-        setUsernameStatus('validating');
+        setUsernameStatus("validating");
         setIsError(null);
 
         // Debounce the API call by 500ms
@@ -51,15 +56,14 @@ function AdminLogin() {
             try {
                 // Call API to verify username exists
                 const response = await verifyUsernameAPI(username);
-                
+
                 // Username verified - store user info and show success state
                 setUserInfo(response.data.user);
-                setUsernameStatus('verified');
-            }
-            catch (error) {
+                setUsernameStatus("verified");
+            } catch (error) {
                 // Username not found or error occurred - show error state
                 setUserInfo(null);
-                setUsernameStatus('invalid');
+                setUsernameStatus("invalid");
                 // Don't set general error yet, only show in feedback section
             }
         }, 500);
@@ -71,15 +75,15 @@ function AdminLogin() {
      */
     function handleChange(e) {
         const { name, value } = e.target;
-        
+
         // Update form data
         setData({ ...data, [name]: value });
 
         // If username field changed, validate it
-        if (name === 'username') {
+        if (name === "username") {
             validateUsername(value);
         }
-    } 
+    }
 
     /**
      * Handle login form submission
@@ -88,30 +92,26 @@ function AdminLogin() {
      */
     async function handleSubmit(event) {
         event.preventDefault();
-        
         // Prevent submission if username not verified
-        if (usernameStatus !== 'verified') {
-            setIsError('Please verify your username first');
+        if (usernameStatus !== "verified") {
+            setIsError("Please verify your username first");
             return;
         }
 
         setIsSubmitting(true);
         setIsError(null);
 
-        try 
-        {
+        try {
             const response = await loginUserAPI(data);
-            setUser({
-                username: response.data.user.username,
-                role: response.data.user.role
-            });
+            console.log("Login successful:", response.data);
+            setUser(response.data.user);
             navigate("/adminPanel/dashboard");
-        }
-        catch (error) {
-            const msg = error?.response?.data?.message || "Login failed. Your secret credentials are incorrect.";
+        } catch (error) {
+            const msg =
+                error?.response?.data?.message ||
+                "Login failed. Your secret credentials are incorrect.";
             setIsError(msg);
-        }
-        finally {
+        } finally {
             setIsSubmitting(false);
         }
     }
@@ -120,36 +120,37 @@ function AdminLogin() {
      * Determine if password field should be enabled
      * Only enabled after username is verified
      */
-    const isPasswordEnabled = usernameStatus === 'verified';
+    const isPasswordEnabled = usernameStatus === "verified";
 
     /**
      * Get feedback message and styling based on username validation state
      */
     const getFeedbackContent = () => {
-        if (usernameStatus === 'validating') {
+        if (usernameStatus === "validating") {
             return {
-                type: 'validating',
-                message: 'Verifying your identity...',
-                icon: '⏳'
+                type: "validating",
+                message: "Verifying your identity...",
+                icon: "⏳",
             };
         }
-        
-        if (usernameStatus === 'invalid') {
+
+        if (usernameStatus === "invalid") {
             return {
-                type: 'error',
-                message: 'Oops! You are not our partner yet. Please contact support.',
-                icon: '❌'
+                type: "error",
+                message:
+                    "Oops! You are not our partner yet. Please contact support.",
+                icon: "❌",
             };
         }
-        
-        if (usernameStatus === 'verified' && userInfo) {
+
+        if (usernameStatus === "verified" && userInfo) {
             return {
-                type: 'success',
+                type: "success",
                 message: `Hello ${userInfo.username}, username verified! Please enter your secret credentials to get in.`,
-                icon: '✅'
+                icon: "✅",
             };
         }
-        
+
         return null;
     };
 
@@ -159,17 +160,29 @@ function AdminLogin() {
         <div className={styles.adminLoginPage}>
             {/* Top banner notification for username validation */}
             {feedbackContent && (
-                <div className={`${styles.topBanner} ${styles[`banner_${feedbackContent.type}`]}`}>
+                <div
+                    className={`${styles.topBanner} ${styles[`banner_${feedbackContent.type}`]}`}
+                >
                     <div className={styles.bannerContent}>
-                        <span className={styles.bannerIcon}>{feedbackContent.icon}</span>
-                        <p className={styles.bannerMessage}>{feedbackContent.message}</p>
+                        <span className={styles.bannerIcon}>
+                            {feedbackContent.icon}
+                        </span>
+                        <p className={styles.bannerMessage}>
+                            {feedbackContent.message}
+                        </p>
                     </div>
                 </div>
             )}
 
             {/* Decorative background elements */}
-            <div className={styles.decorativeBlob} style={{ top: '10%', left: '-5%' }}></div>
-            <div className={styles.decorativeBlob} style={{ bottom: '5%', right: '-8%' }}></div>
+            <div
+                className={styles.decorativeBlob}
+                style={{ top: "10%", left: "-5%" }}
+            ></div>
+            <div
+                className={styles.decorativeBlob}
+                style={{ bottom: "5%", right: "-8%" }}
+            ></div>
 
             <div className={styles.loginContainer}>
                 {/* Left side - Brand and welcome message */}
@@ -181,22 +194,25 @@ function AdminLogin() {
                     <p className={styles.brandSubtitle}>Partner Admin Portal</p>
                     <div className={styles.brandDivider}></div>
                     <p className={styles.welcomeText}>
-                        Welcome back! Secure access to your business management tools and partner dashboard.
+                        Welcome back! Secure access to your business management
+                        tools and partner dashboard.
                     </p>
                 </div>
 
                 {/* Right side - Login form card */}
                 <div className={styles.loginCard}>
                     <h2 className={styles.cardTitle}>Sign In</h2>
-                    <p className={styles.cardSubtitle}>Access your partner dashboard</p>
+                    <p className={styles.cardSubtitle}>
+                        Access your partner dashboard
+                    </p>
 
-                   {/* Error message display */}
+                    {/* Error message display */}
                     {isError && (
                         <div className={styles.errorAlert}>
                             <span className={styles.errorIcon}>⚠️</span>
                             <p>{isError}</p>
                         </div>
-                    )} 
+                    )}
 
                     {/* Login form */}
                     <form className={styles.loginForm} onSubmit={handleSubmit}>
@@ -212,14 +228,16 @@ function AdminLogin() {
                                     onChange={handleChange}
                                     name="username"
                                     value={data.username}
-                                    className={`${styles.input} ${usernameStatus ? styles[`input_${usernameStatus}`] : ''}`}
+                                    className={`${styles.input} ${usernameStatus ? styles[`input_${usernameStatus}`] : ""}`}
                                 />
                                 {/* Status indicator icon */}
                                 {usernameStatus && (
-                                    <span className={`${styles.statusIndicator} ${styles[`indicator_${usernameStatus}`]}`}>
-                                        {usernameStatus === 'validating' && '⟳'}
-                                        {usernameStatus === 'verified' && '✓'}
-                                        {usernameStatus === 'invalid' && '✕'}
+                                    <span
+                                        className={`${styles.statusIndicator} ${styles[`indicator_${usernameStatus}`]}`}
+                                    >
+                                        {usernameStatus === "validating" && "⟳"}
+                                        {usernameStatus === "verified" && "✓"}
+                                        {usernameStatus === "invalid" && "✕"}
                                     </span>
                                 )}
                             </div>
@@ -227,20 +245,50 @@ function AdminLogin() {
 
                         {/* Password input field - only enabled after username verification */}
                         <div className={styles.inputGroup}>
-                            <label htmlFor="password" className={!isPasswordEnabled ? styles.labelDisabled : ''}>
+                            <label
+                                htmlFor="password"
+                                className={
+                                    !isPasswordEnabled
+                                        ? styles.labelDisabled
+                                        : ""
+                                }
+                            >
                                 Secret Credentials
                             </label>
                             <div className={styles.inputWrapper}>
+                                {/* Create the password field and switch between "password" and "text" using state. */}
                                 <input
                                     id="password"
-                                    type="password"
-                                    placeholder={isPasswordEnabled ? "Enter your password" : "Verify username first"}
+                                    type={passwordInputType}
+                                    placeholder={
+                                        isPasswordEnabled
+                                            ? "Enter your password"
+                                            : "Verify username first"
+                                    }
                                     disabled={!isPasswordEnabled}
                                     onChange={handleChange}
                                     name="password"
                                     value={data.password}
-                                    className={styles.input}
+                                    className={`${styles.input} ${styles.passwordInput}`}
                                 />
+
+                                {/* Create a small eye button that toggles password visibility. */}
+                                <button
+                                    type="button"
+                                    onClick={() =>
+                                        setShowPassword(!showPassword)
+                                    }
+                                    disabled={!isPasswordEnabled}
+                                    className={styles.eyeButton}
+                                    aria-label={passwordLabelToggle}
+                                >
+                                    {/* Show the open eye when password is hidden, and the crossed eye when it is visible. */}
+                                    {showPassword ? (
+                                        <EyeOff size={18} />
+                                    ) : (
+                                        <Eye size={18} />
+                                    )}
+                                </button>
                             </div>
                             {!isPasswordEnabled && (
                                 <p className={styles.helperText}>
@@ -249,21 +297,20 @@ function AdminLogin() {
                             )}
                         </div>
 
-                        
-
                         {/* Submit button */}
                         <button
                             className={styles.btnSubmit}
                             type="submit"
                             disabled={!isPasswordEnabled || isSubmitting}
                         >
-                            {isSubmitting ? 'Signing in...' : 'Sign In'}
+                            {isSubmitting ? "Signing in..." : "Sign In"}
                         </button>
                     </form>
 
                     {/* Security note at bottom */}
                     <p className={styles.securityNote}>
-                        🔒 Only authorized partner representatives may access this panel. All access is logged.
+                        🔒 Only authorized partner representatives may access
+                        this panel. All access is logged.
                     </p>
                 </div>
             </div>

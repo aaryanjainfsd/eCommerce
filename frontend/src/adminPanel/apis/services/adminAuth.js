@@ -36,20 +36,3 @@ export async function loginUserAPI(adminLoginData)
         throw error.response?.data || error;
     }
 }
-
-/**
- * Get authenticated user's profile information
- * @returns {Promise} Response containing user profile data
- */
-export async function getUserProfileAPI()
-{
-    try
-    {
-        const response = await axiosInstance.get("/admin/auth/profile", { withCredentials: true });
-        return response;
-    }
-    catch (error)
-    {
-        throw error.response?.data || error;
-    }
-}
