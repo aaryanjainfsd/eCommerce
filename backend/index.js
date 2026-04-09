@@ -7,11 +7,15 @@ import swaggerSpec from "./src/shared/config/swagger.js";
 
 // DB Connection 
 import connectToDB from "./src/shared/config/db.js";
+
+
+// --------------------------- SHARED ROUTES --------------------------------------------
 import ClientRouter from "./src/shared/routes/ClientRouter.js";
+import productRouter from "./src/shared/routes/ProductRouter.js";
+// ------------------------------------------------------------------------------------------
 
 // --------------------------- STOREFRONT ROUTES --------------------------------------------
 import authRouter from "./src/storeFront/routes/AuthRouter.js";
-import productRouter from "./src/storeFront/routes/ProductRouter.js";
 // ------------------------------------------------------------------------------------------
 
 //----------------------------- ADMIN ROUTES ------------------------------------------------
@@ -34,17 +38,17 @@ app.use(cors({
 	credentials: true
 }));
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec, { explorer: true }));
-app.use("/uploads", express.static("uploads"));
+app.use("/uploads", express.static("src/shared/uploads"));
 
 // Connect to Mongo Database
 await connectToDB();
 
 //----------------------------- SHARED ROUTES ------------------------------------------------
 app.use("/shared/clients", ClientRouter);
+app.use("/shared/products", productRouter);
 // -------------------------------------------------------------------------------------------
 
 // --------------------------- STOREFRONT ROUTES --------------------------------------------
-app.use("/storefront/products", productRouter);
 app.use("/storefront/auth", authRouter);
 // ------------------------------------------------------------------------------------------
 

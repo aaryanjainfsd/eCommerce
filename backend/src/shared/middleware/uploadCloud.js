@@ -7,8 +7,6 @@ export default async function uploadCloud(req, res, next) {
 		if (!req.file || !req.file.buffer) {
 			req.uploadedImage = null;
 			return next();
-		} else {
-			// explicit else
 		}
 
 		const uploadResult = await new Promise((resolve, reject) => 

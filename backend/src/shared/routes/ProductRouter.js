@@ -15,14 +15,14 @@ const productRouter = Router();
 /**
  * @swagger
  * tags:
- *   name: Storefront Products
- *   description: Storefront product APIs
+ *   name: Shared Products
+ *   description: Shared product APIs
  */
 
 // Redirecting to controller functions
 /**
  * @swagger
- * /storefront/products/get:
+ * /shared/products/get:
  *   get:
  *     summary: Get all products
  *     tags: [Storefront Products]
@@ -34,29 +34,66 @@ productRouter.get('/get', getProducts);
 
 /**
  * @swagger
- * /storefront/products/add:
+ * /shared/products/add:
  *   post:
  *     summary: Add product with image upload
  *     tags: [Storefront Products]
  *     requestBody:
  *       required: true
  *       content:
- *         multipart/form-data:
+ *         application/json:
  *           schema:
  *             type: object
- *             required: [name, slug, category, discountedPrice, orignalPrice, description, image]
+ *             required: [name, category, sellingPrice, stockQuantity, stockStatus, shortDescription]
  *             properties:
  *               name:
  *                 type: string
- *               slug:
+ *               category:
+ *                 type: string
+ *               sellingPrice:
+ *                 type: number
+ *               stockQuantity:
+ *                 type: number
+ *               stockStatus:
+ *                 type: string
+ *               shortDescription:
+ *                 type: string
+ *               brand:
+ *                 type: string
+ *               sku:
+ *                 type: string
+ *               mrp:
+ *                 type: number
+ *               productVisibility:
+ *                 type: string
+ *               productLabel:
+ *                 type: string
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             required: [name, category, sellingPrice, stockQuantity, stockStatus, shortDescription]
+ *             properties:
+ *               name:
  *                 type: string
  *               category:
  *                 type: string
- *               discountedPrice:
+ *               sellingPrice:
+ *                 type: number
+ *               stockQuantity:
+ *                 type: number
+ *               stockStatus:
  *                 type: string
- *               orignalPrice:
+ *               shortDescription:
  *                 type: string
- *               description:
+ *               brand:
+ *                 type: string
+ *               sku:
+ *                 type: string
+ *               mrp:
+ *                 type: number
+ *               productVisibility:
+ *                 type: string
+ *               productLabel:
  *                 type: string
  *               image:
  *                 type: string
@@ -80,7 +117,7 @@ productRouter.post('/add',
 
 /**
  * @swagger
- * /storefront/products/get/{id}:
+ * /shared/products/get/{id}:
  *   get:
  *     summary: Get single product by id
  *     tags: [Storefront Products]
@@ -100,7 +137,7 @@ productRouter.get('/get/:id', getSingleProduct);
 
 /**
  * @swagger
- * /storefront/products/update/{id}:
+ * /shared/products/update/{id}:
  *   put:
  *     summary: Update product by id
  *     tags: [Storefront Products]
@@ -118,7 +155,7 @@ productRouter.put('/update/:id', (useCloud ? uploadCloud : uploadLocal.single("i
 
 /**
  * @swagger
- * /storefront/products/delete/{id}:
+ * /shared/products/delete/{id}:
  *   delete:
  *     summary: Delete product by id
  *     tags: [Storefront Products]

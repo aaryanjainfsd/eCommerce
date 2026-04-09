@@ -1,4 +1,3 @@
-// backend/middlewear/uploadLocal.js
 import fs from "fs";
 import path from "path";
 
@@ -9,7 +8,7 @@ export default function uploadLocal(req, res, next) {
 			return next();
 		}
     
-        const uploadDir = path.join(process.cwd(), "uploads", "productImages");
+        const uploadDir = path.join(process.cwd(), "src", "shared", "uploads", "productImages");
         
 		if (!fs.existsSync(uploadDir)) {
 			fs.mkdirSync(uploadDir, { recursive: true });

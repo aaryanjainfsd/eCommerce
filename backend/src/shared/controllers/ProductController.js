@@ -21,8 +21,8 @@ export async function addProduct(req, res)
 {
     try 
     {
-        console.log("Request Body:", req);
-        const payload = { ...req.body };
+        console.log("Request Body:", req.body);
+        const payload = { ...req.body }; 
     
         payload.images = {
 			local: "",

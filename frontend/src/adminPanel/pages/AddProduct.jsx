@@ -1,19 +1,28 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import {
-    ArrowLeft,
-    ArrowRight,
-    CheckCircle2,
-    Gift,
-    Palette,
-    Save,
-    Sparkles,
-} from "lucide-react";
+import { ArrowLeft, ArrowRight, Save } from "lucide-react";
+import { addProductAPI } from "../apis/services/product.service";
 import styles from "../assets/css/addProduct.module.css";
 
 function AddProduct() {
     const [currentStep, setCurrentStep] = useState(1);
     const totalSteps = 3;
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const [productData, setProductData] = useState({
+        name: "",
+        category: "",
+        sellingPrice: "",
+        stockQuantity: "",
+        stockStatus: "In Stock",
+        shortDescription: "",
+        brand: "",
+        sku: "",
+        mrp: "",
+        image: null,
+        productVisibility: "Show on Storefront",
+        productLabel: "Standard Product",
+    });
 
     const stepDetails = {
         1: {
@@ -53,8 +62,58 @@ function AddProduct() {
         setCurrentStep((prev) => Math.max(prev - 1, 1));
     }
 
-    function handleSubmit(event) {
+    function handleChange(event) {
+        const { name, value, type, files } = event.target;
+
+        setProductData((prev) => ({
+            ...prev,
+            [name]: type === "file" ? files[0] : value,
+        }));
+    }
+
+    async function handleSubmit(event) {
         event.preventDefault();
+
+        const formData = new FormData();
+
+        Object.entries(productData).forEach(([key, value]) => {
+            if (key === "image") {
+                if (value) formData.append("image", value);
+            } else if (value !== "") {
+                formData.append(key, value);
+            }
+        });
+
+        try {
+            setIsSubmitting(true);
+
+            const result = await addProductAPI(formData);
+            console.log("Server Response:", result);
+
+            alert(result.message || "Product added successfully!");
+
+            setProductData({
+                name: "",
+                category: "",
+                sellingPrice: "",
+                stockQuantity: "",
+                stockStatus: "In Stock",
+                shortDescription: "",
+                brand: "",
+                sku: "",
+                mrp: "",
+                image: null,
+                productVisibility: "Show on Storefront",
+                productLabel: "Standard Product",
+            });
+
+            setCurrentStep(1);
+        } catch (error) {
+            console.error("Submit error:", error);
+            alert(error?.message || error?.error || "Failed to add product");
+        } finally {
+            setIsSubmitting(false);
+        }
     }
 
     return (
@@ -110,7 +169,7 @@ function AddProduct() {
                 </button>
             </div>
 
-            <form className={styles.formCard} noValidate onSubmit={handleSubmit}>
+            <form className={styles.formCard} noValidate onSubmit={handleSubmit} encType="multipart/form-data">
                 <div className={styles.stepHeader}>
                     <div>
                         <p className={styles.sectionLabel}>{activeStep.label}</p>
@@ -129,7 +188,14 @@ function AddProduct() {
                                 <span className={styles.fieldHint}>
                                     Example: Premium Wireless Headphones
                                 </span>
-                                <input type="text" placeholder="Enter product name" />
+                                <input
+                                    type="text"
+                                    name="name"
+                                    value={productData.name}
+                                    onChange={handleChange}
+                                    placeholder="Enter product name"
+                                    required
+                                />
                             </label>
 
                             <label>
@@ -137,12 +203,17 @@ function AddProduct() {
                                 <span className={styles.fieldHint}>
                                     Select the closest category
                                 </span>
-                                <select>
-                                    <option>Select category</option>
-                                    <option>Electronics</option>
-                                    <option>Fashion</option>
-                                    <option>Home Decor</option>
-                                    <option>Groceries</option>
+                                <select
+                                    name="category"
+                                    value={productData.category}
+                                    onChange={handleChange}
+                                    required
+                                >
+                                    <option value="">Select category</option>
+                                    <option value="Electronics">Electronics</option>
+                                    <option value="Fashion">Fashion</option>
+                                    <option value="Home Decor">Home Decor</option>
+                                    <option value="Groceries">Groceries</option>
                                 </select>
                             </label>
                         </div>
@@ -151,7 +222,15 @@ function AddProduct() {
                             <label>
                                 Selling Price (Rs.) <span className={styles.requiredMark}>*</span>
                                 <span className={styles.fieldHint}>Example: 1499</span>
-                                <input type="number" placeholder="0" />
+                                <input
+                                    type="number"
+                                    name="sellingPrice"
+                                    value={productData.sellingPrice}
+                                    onChange={handleChange}
+                                    placeholder="0"
+                                    min="0"
+                                    required
+                                />
                             </label>
 
                             <label>
@@ -159,7 +238,15 @@ function AddProduct() {
                                 <span className={styles.fieldHint}>
                                     How many units are available?
                                 </span>
-                                <input type="number" placeholder="0" />
+                                <input
+                                    type="number"
+                                    name="stockQuantity"
+                                    value={productData.stockQuantity}
+                                    onChange={handleChange}
+                                    placeholder="0"
+                                    min="0"
+                                    required
+                                />
                             </label>
 
                             <label>
@@ -167,11 +254,16 @@ function AddProduct() {
                                 <span className={styles.fieldHint}>
                                     Pick the current availability
                                 </span>
-                                <select>
-                                    <option>In Stock</option>
-                                    <option>Low Stock</option>
-                                    <option>Out of Stock</option>
-                                    <option>Pre Order</option>
+                                <select
+                                    name="stockStatus"
+                                    value={productData.stockStatus}
+                                    onChange={handleChange}
+                                    required
+                                >
+                                    <option value="In Stock">In Stock</option>
+                                    <option value="Low Stock">Low Stock</option>
+                                    <option value="Out of Stock">Out of Stock</option>
+                                    <option value="Pre Order">Pre Order</option>
                                 </select>
                             </label>
                         </div>
@@ -183,7 +275,11 @@ function AddProduct() {
                             </span>
                             <textarea
                                 rows="4"
+                                name="shortDescription"
+                                value={productData.shortDescription}
+                                onChange={handleChange}
                                 placeholder="Example: Stylish, durable and easy to use for everyday needs."
+                                required
                             />
                         </label>
                     </>
@@ -197,19 +293,38 @@ function AddProduct() {
                             <label>
                                 Brand
                                 <span className={styles.fieldHint}>Example: Boat, Nike, Samsung</span>
-                                <input type="text" placeholder="Enter brand name" />
+                                <input
+                                    type="text"
+                                    name="brand"
+                                    value={productData.brand}
+                                    onChange={handleChange}
+                                    placeholder="Enter brand name"
+                                />
                             </label>
 
                             <label>
                                 SKU
                                 <span className={styles.fieldHint}>Internal product code</span>
-                                <input type="text" placeholder="Ex: PRD-1001" />
+                                <input
+                                    type="text"
+                                    name="sku"
+                                    value={productData.sku}
+                                    onChange={handleChange}
+                                    placeholder="Ex: PRD-1001"
+                                />
                             </label>
 
                             <label>
                                 MRP (Rs.)
                                 <span className={styles.fieldHint}>Original price if needed</span>
-                                <input type="number" placeholder="0" />
+                                <input
+                                    type="number"
+                                    name="mrp"
+                                    value={productData.mrp}
+                                    onChange={handleChange}
+                                    placeholder="0"
+                                    min="0"
+                                />
                             </label>
                         </div>
 
@@ -221,7 +336,13 @@ function AddProduct() {
                                 <span className={styles.fieldHint}>
                                     Choose an image file now — upload handling will be connected later
                                 </span>
-                                <input type="file" accept="image/*" className={styles.fileInput} />
+                                <input
+                                    type="file"
+                                    name="image"
+                                    accept="image/*"
+                                    onChange={handleChange}
+                                    className={styles.fileInput}
+                                />
                             </label>
                         </div>
                     </>
@@ -235,10 +356,14 @@ function AddProduct() {
                                 <span className={styles.fieldHint}>
                                     Decide where this product should appear
                                 </span>
-                                <select>
-                                    <option>Show on Storefront</option>
-                                    <option>Keep in Draft Mode</option>
-                                    <option>Hide for Now</option>
+                                <select
+                                    name="productVisibility"
+                                    value={productData.productVisibility}
+                                    onChange={handleChange}
+                                >
+                                    <option value="Show on Storefront">Show on Storefront</option>
+                                    <option value="Keep in Draft Mode">Keep in Draft Mode</option>
+                                    <option value="Hide for Now">Hide for Now</option>
                                 </select>
                             </label>
 
@@ -247,11 +372,15 @@ function AddProduct() {
                                 <span className={styles.fieldHint}>
                                     Optional tag for better presentation
                                 </span>
-                                <select>
-                                    <option>Standard Product</option>
-                                    <option>New Arrival</option>
-                                    <option>Best Seller</option>
-                                    <option>Featured Pick</option>
+                                <select
+                                    name="productLabel"
+                                    value={productData.productLabel}
+                                    onChange={handleChange}
+                                >
+                                    <option value="Standard Product">Standard Product</option>
+                                    <option value="New Arrival">New Arrival</option>
+                                    <option value="Best Seller">Best Seller</option>
+                                    <option value="Featured Pick">Featured Pick</option>
                                 </select>
                             </label>
                         </div>
@@ -302,9 +431,9 @@ function AddProduct() {
                             </button>
                         </>
                     ) : (
-                        <button type="submit" className={styles.primaryButton}>
+                        <button type="submit" className={styles.primaryButton} disabled={isSubmitting}>
                             <Save size={16} />
-                            Submit Product
+                            {isSubmitting ? "Submitting..." : "Submit Product"}
                         </button>
                     )}
                 </div>
