@@ -19,6 +19,8 @@ import AdminOutlet from "../../adminPanel/components/AdminOutlet";
 import AdminLogin from "../../adminPanel/pages/AdminLogin";
 import Dashboard from "../../adminPanel/pages/Dashboard";
 import AdminProfile from "../../adminPanel/pages/AdminProfile";
+import Products from "../../adminPanel/pages/Products";
+import AddProduct from "../../adminPanel/pages/AddProduct";
 
 // ==================== SUPER ADMIN IMPORTS ====================
 import SuperAdminPanelOutlet from "../../superAdminPanel/components/SuperAdminPanelOutlet.jsx";
@@ -37,7 +39,6 @@ import FirebaseProvider from "../../storeFront/contexts/FirebaseProvider";
 import CurrencyProvider from "../../storeFront/contexts/CurrencyProvider";
 
 
-
 const storeFrontChildren = [ 
     { index : true, element: <Home /> },
     { path: "cart", element: <Cart /> },
@@ -53,6 +54,8 @@ const adminChildren = [
     { index: true, element: <AdminLogin />},
     { path: "dashboard", element: ( <AdminProtectedRoute> <Dashboard /> </AdminProtectedRoute>),},
     { path: "profile", element: ( <AdminProtectedRoute> <AdminProfile /> </AdminProtectedRoute>),},
+    { path: "products", element: ( <AdminProtectedRoute> <Products /> </AdminProtectedRoute>),},
+    { path: "products/add", element: ( <AdminProtectedRoute> <AddProduct /> </AdminProtectedRoute>),},
 ];
 
 const superAdminPanelChildren = [

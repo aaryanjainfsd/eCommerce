@@ -65,9 +65,7 @@ productRouter.get('/get', getProducts);
  *       201:
  *         description: Product added successfully
  */
-productRouter.post(
-    // URL
-    '/add',
+productRouter.post('/add',
     
     // Middlewears  
     parseMultipart.single("image"),

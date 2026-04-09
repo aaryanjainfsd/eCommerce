@@ -5,7 +5,9 @@ import useAdminAuthStore from "../stores/adminAuthStore";
 function Dashboard() {
     const { user } = useAdminAuthStore();
     const userDetails = user?.client_id || {};
-    const clientName = userDetails?.clientName || "Partner";
+    const clientName =
+        (userDetails?.clientName || "Partner").charAt(0).toUpperCase() +
+        (userDetails?.clientName || "Partner").slice(1);
     const businessName = userDetails?.businessName || "Your Business";
 
     // Keep these values safe even when backend counters are not ready yet.
@@ -14,14 +16,12 @@ function Dashboard() {
 
     return (
         <section className={styles.dashboardPage}>
-            <h1 className={styles.dashboardTitle}>Admin Dashboard</h1>
-            <p className={styles.dashboardSubtitle}>
-                Manage your operations from one place.
-            </p>
+            <h1 className={styles.dashboardTitle}>Dashboard</h1>
+            
 
             <article className={styles.welcomePanel}>
                 <h2 className={styles.welcomeTitle}>
-                    Welcome {clientName}
+                    Welcome, {clientName}
                 </h2>
                 <p className={styles.welcomeMessage}>
                     Get in and keep exploring your business,
@@ -40,13 +40,7 @@ function Dashboard() {
                         Products currently available in your catalog.
                     </p>
                 </article>
-                <article className={styles.dashboardCard}>
-                    <h3>Recent Orders</h3>
-                    <p className={styles.metricValue}>{recentOrders}</p>
-                    <p className={styles.metricHint}>
-                        Latest incoming orders waiting for action.
-                    </p>
-                </article>
+               
             </div>
         </section>
     );

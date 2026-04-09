@@ -42,7 +42,6 @@ export async function addProduct(req, res)
             message: "Product added successfully",
             product: newProduct,
         });
-
     } 
     catch (error) 
     {

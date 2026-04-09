@@ -11,8 +11,7 @@ import styles from "../assets/css/header.module.css";
 
 const navItems = [
     { to: "/adminPanel/dashboard", label: "Dashboard", icon: Home },
-    { to: "/adminPanel/products", label: "Products", icon: Package },
-    { to: "/adminPanel/orders", label: "Orders", icon: ShoppingCart },
+    { to: "/adminPanel/products", label: "Products", icon: Package }
 ];
 
 function Sidebar({ collapsed, onToggleCollapsed, mobileOpen, onCloseMobile }) {

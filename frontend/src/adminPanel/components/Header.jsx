@@ -25,6 +25,7 @@ const notifications = [
 ];
 
 function Header({ onMobileMenuToggle }) {
+    
     const navigate = useNavigate();
     const { user, setLoggedOut } = useAdminAuthStore();
     const userDetails = user?.client_id || {};
@@ -49,8 +50,9 @@ function Header({ onMobileMenuToggle }) {
                     <Menu size={20} />
                 </button>
                 <div className={styles.brand}>
-                    <span className={styles.logo}>E</span>
-                    <span>eComForAll Admin</span>
+                    <span className={styles.logo}>  {userDetails?.businessName?.charAt(0).toUpperCase()}</span>
+                    
+                    <span> {userDetails?.businessName}  (  {userDetails?.clientName} )</span>
                 </div>
             </div>
             <div className={styles.right}>
