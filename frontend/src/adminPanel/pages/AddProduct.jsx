@@ -29,14 +29,14 @@ function AddProduct() {
             label: "Step 1 of 3",
             title: "Basic Product Information",
             description:
-                "Start with the essential product details. This is the main step you need to fill first.",
+                "Start with the essential product details, including SKU. This step must be completed first.",
             badge: "Start Here",
         },
         2: {
             label: "Step 2 of 3",
-            title: "Images & Extra Details",
+            title: "Extra Details & Description",
             description:
-                "Add a few supporting details if you want. This step is optional and can be skipped.",
+                "Add optional description, brand and images. The short description is not required.",
             badge: "Optional Step",
         },
         3: {
@@ -54,8 +54,27 @@ function AddProduct() {
         setCurrentStep(step);
     }
 
+    function validateStep(step) {
+        if (step === 1) {
+            if (
+                !productData.name.trim() ||
+                !productData.category.trim() ||
+                !productData.sku.trim() ||
+                productData.sellingPrice === "" ||
+                productData.stockQuantity === ""
+            ) {
+                alert("Please complete all required fields in Step 1 before moving on.");
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     function handleNextStep() {
-        setCurrentStep((prev) => Math.min(prev + 1, totalSteps));
+        if (validateStep(currentStep)) {
+            setCurrentStep((prev) => Math.min(prev + 1, totalSteps));
+        }
     }
 
     function handlePreviousStep() {
@@ -73,6 +92,12 @@ function AddProduct() {
 
     async function handleSubmit(event) {
         event.preventDefault();
+
+        if (!productData.sku.trim()) {
+            alert("Product SKU is required before submitting.");
+            setCurrentStep(1);
+            return;
+        }
 
         const formData = new FormData();
 
@@ -269,16 +294,16 @@ function AddProduct() {
                         </div>
 
                         <label>
-                            Short Description <span className={styles.requiredMark}>*</span>
+                            SKU <span className={styles.requiredMark}>*</span>
                             <span className={styles.fieldHint}>
-                                Keep it simple and customer-friendly in one or two lines
+                                Unique product code for internal tracking
                             </span>
-                            <textarea
-                                rows="4"
-                                name="shortDescription"
-                                value={productData.shortDescription}
+                            <input
+                                type="text"
+                                name="sku"
+                                value={productData.sku}
                                 onChange={handleChange}
-                                placeholder="Example: Stylish, durable and easy to use for everyday needs."
+                                placeholder="Ex: PRD-1001"
                                 required
                             />
                         </label>
@@ -287,8 +312,6 @@ function AddProduct() {
 
                 {currentStep === 2 && (
                     <>
-                        
-
                         <div className={styles.gridThree}>
                             <label>
                                 Brand
@@ -299,18 +322,6 @@ function AddProduct() {
                                     value={productData.brand}
                                     onChange={handleChange}
                                     placeholder="Enter brand name"
-                                />
-                            </label>
-
-                            <label>
-                                SKU
-                                <span className={styles.fieldHint}>Internal product code</span>
-                                <input
-                                    type="text"
-                                    name="sku"
-                                    value={productData.sku}
-                                    onChange={handleChange}
-                                    placeholder="Ex: PRD-1001"
                                 />
                             </label>
 
@@ -326,13 +337,25 @@ function AddProduct() {
                                     min="0"
                                 />
                             </label>
+
+                            <label>
+                                Short Description
+                                <span className={styles.fieldHint}>
+                                    Optional summary for storefront cards and search.
+                                </span>
+                                <textarea
+                                    rows="4"
+                                    name="shortDescription"
+                                    value={productData.shortDescription}
+                                    onChange={handleChange}
+                                    placeholder="Example: Stylish, durable, and easy to use for everyday needs."
+                                />
+                            </label>
                         </div>
 
                         <div className={styles.grid}>
-                            
-
                             <label>
-                                Upload Product Image
+                                Upload Product Main Image
                                 <span className={styles.fieldHint}>
                                     Choose an image file now — upload handling will be connected later
                                 </span>

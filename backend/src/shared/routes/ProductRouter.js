@@ -1,10 +1,10 @@
 import { Router } from 'express';
 import parseMultipart from "../middleware/parseMultipart.js";
-import uploadLocal from '../middleware/uploadLocal.js';
-import uploadCloud from '../middleware/uploadCloud.js';
+import {mainImgUploadLocalMw, multipleImgsUploadLocalMw} from '../middleware/uploadLocal.js';
+import {mainImgUploadCloudMw, multipleImgsUploadCloudMw } from '../middleware/uploadCloud.js';
 import validateNewProduct from "../middleware/validateNewProduct.js";
 
-import { addProduct, deleteProduct, getProducts, updateProduct, getSingleProduct } from '../controllers/ProductController.js';
+import { addProduct, addMultipleProductImages, deleteProduct, getProducts, updateProduct, getSingleProduct } from '../controllers/ProductController.js';
 
 
 const useLocal = true;
@@ -44,7 +44,7 @@ productRouter.get('/get', getProducts);
  *         application/json:
  *           schema:
  *             type: object
- *             required: [name, category, sellingPrice, stockQuantity, stockStatus, shortDescription]
+ *             required: [name, category, sellingPrice, stockQuantity, stockStatus, sku]
  *             properties:
  *               name:
  *                 type: string
@@ -71,7 +71,7 @@ productRouter.get('/get', getProducts);
  *         multipart/form-data:
  *           schema:
  *             type: object
- *             required: [name, category, sellingPrice, stockQuantity, stockStatus, shortDescription]
+ *             required: [name, category, sellingPrice, stockQuantity, stockStatus, sku]
  *             properties:
  *               name:
  *                 type: string
@@ -108,8 +108,8 @@ productRouter.post('/add',
     parseMultipart.single("image"),
     validateNewProduct,
 
-    (useLocal ? uploadLocal : (req, res, next) => next()),
-    (useCloud ? uploadCloud : (req, res, next) => next()),
+    (useLocal ? mainImgUploadLocalMw : (req, res, next) => next()),
+    (useCloud ? mainImgUploadCloudMw : (req, res, next) => next()),
 
     // Controller Address
     addProduct
@@ -151,7 +151,7 @@ productRouter.get('/get/:id', getSingleProduct);
  *       200:
  *         description: Product updated successfully
  */
-productRouter.put('/update/:id', (useCloud ? uploadCloud : uploadLocal.single("image")), updateProduct);
+productRouter.put('/update/:id', (useCloud ? mainImgUploadCloudMw : mainImgUploadLocalMw), updateProduct);
 
 /**
  * @swagger
@@ -170,5 +170,16 @@ productRouter.put('/update/:id', (useCloud ? uploadCloud : uploadLocal.single("i
  *         description: Product deleted successfully
  */
 productRouter.delete('/delete/:id', deleteProduct);
+
+productRouter.post('/add-images/:productId',
+    // Middlewears
+    parseMultipart.array("images", 10), 
+
+    (useLocal ? multipleImgsUploadLocalMw : (req, res, next) => next()),
+    (useCloud ? multipleImgsUploadCloudMw : (req, res, next) => next()),
+
+    // Controller Address
+    addMultipleProductImages
+);
 
 export default productRouter;

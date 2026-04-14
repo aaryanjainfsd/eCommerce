@@ -1,20 +1,5 @@
 import {Schema, model } from "mongoose";
 
-// SCHEMA   
-// const adminAuthSchema = new Schema(
-//     {
-//         name: { type: String },
-//         clientId: { type: Schema.Types.ObjectId, ref: "client", unique: true, sparse: true },
-//         username: { type: String, required: true, unique: true },   
-//         password: { type: String, required: true },
-//         role: { type: String, default: "admin" }
-//     }, 
-//     { 
-//         timestamps: true,
-//         collection: "admin_auth_model"
-//     }
-// );
-
 const adminAuthSchema = new Schema(
     {
         foreignKeys: {

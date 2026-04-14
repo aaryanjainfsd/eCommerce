@@ -21,6 +21,7 @@ import Dashboard from "../../adminPanel/pages/Dashboard";
 import AdminProfile from "../../adminPanel/pages/AdminProfile";
 import Products from "../../adminPanel/pages/Products";
 import AddProduct from "../../adminPanel/pages/AddProduct";
+import AddMorePhotos from "../../adminPanel/pages/AddMorePhotos";
 
 // ==================== SUPER ADMIN IMPORTS ====================
 import SuperAdminPanelOutlet from "../../superAdminPanel/components/SuperAdminPanelOutlet.jsx";
@@ -56,6 +57,7 @@ const adminChildren = [
     { path: "profile", element: ( <AdminProtectedRoute> <AdminProfile /> </AdminProtectedRoute>),},
     { path: "products", element: ( <AdminProtectedRoute> <Products /> </AdminProtectedRoute>),},
     { path: "products/add", element: ( <AdminProtectedRoute> <AddProduct /> </AdminProtectedRoute>),},
+    { path: "products/:productId/photos", element: ( <AdminProtectedRoute> <AddMorePhotos /> </AdminProtectedRoute>),},
 ];
 
 const superAdminPanelChildren = [

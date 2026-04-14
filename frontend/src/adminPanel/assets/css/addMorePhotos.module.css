@@ -1,0 +1,176 @@
+.page {
+    padding: 2rem;
+    background:
+        radial-gradient(circle at 10% 5%, rgba(208, 232, 255, 0.65), transparent 36%),
+        radial-gradient(circle at 90% 10%, rgba(230, 247, 214, 0.6), transparent 30%),
+        linear-gradient(180deg, #f9fbff 0%, #f4f8ff 100%);
+    min-height: 100%;
+}
+
+.pageHeader {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.4rem;
+}
+
+.eyebrow {
+    margin: 0;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #39627a;
+    font-weight: 700;
+}
+
+.title {
+    margin: 0.25rem 0;
+    color: #12384b;
+    font-size: clamp(1.45rem, 2vw, 2rem);
+}
+
+.subtitle {
+    margin: 0;
+    color: #5e7284;
+    max-width: 650px;
+}
+
+.backLink {
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.72rem 1rem;
+    border-radius: 0.7rem;
+    border: 1px solid #c7dbe7;
+    background: #ffffff;
+    color: #1b506b;
+    font-weight: 700;
+}
+
+.card {
+    background: #ffffff;
+    border: 1px solid #e3edf4;
+    border-radius: 1rem;
+    padding: 1.2rem;
+    box-shadow: 0 16px 36px rgba(15, 51, 68, 0.08);
+}
+
+.productSummary {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    border-radius: 0.85rem;
+    border: 1px solid #e7eef4;
+    background: #f8fbfe;
+    margin-bottom: 1rem;
+}
+
+.productSummary h2 {
+    margin: 0 0 0.2rem;
+    color: #133e54;
+}
+
+.productSummary p,
+.productSummary span {
+    margin: 0;
+    color: #617a8d;
+}
+
+.iconWrap {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 0.8rem;
+    background: linear-gradient(140deg, #dbefff 0%, #b7dfff 100%);
+    color: #114563;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.uploadBox {
+    border: 2px dashed #bfd7e6;
+    border-radius: 0.9rem;
+    padding: 1.3rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    align-items: flex-start;
+    background: #fcfeff;
+    color: #21485f;
+    cursor: pointer;
+}
+
+.uploadBox input {
+    display: none;
+}
+
+.fileList {
+    margin-top: 1rem;
+}
+
+.fileList h3 {
+    margin: 0 0 0.5rem;
+    color: #173f55;
+}
+
+.fileList ul {
+    margin: 0;
+    padding-left: 1.1rem;
+    color: #446276;
+}
+
+.uploadButton {
+    margin-top: 1.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.95rem 1.4rem;
+    border: none;
+    border-radius: 0.9rem;
+    background: linear-gradient(135deg, #2b7bbf 0%, #0f5a8e 100%);
+    color: #ffffff;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 150ms ease, box-shadow 150ms ease, background 150ms ease;
+    box-shadow: 0 14px 30px rgba(27, 80, 107, 0.16);
+}
+
+.uploadButton:hover {
+    transform: translateY(-1px);
+    background: linear-gradient(135deg, #1f63a6 0%, #0d4f7b 100%);
+}
+
+.uploadButton:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.emptyText {
+    margin: 1rem 0 0;
+    color: #617a8d;
+}
+
+@media (max-width: 760px) {
+    .page {
+        padding: 1rem;
+    }
+
+    .pageHeader {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .backLink {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .productSummary {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}

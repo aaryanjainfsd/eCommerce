@@ -12,19 +12,31 @@ function createSlug(value = "") {
 
 export default async function validateNewProduct(req, res, next) {
     try {
-        const { name } = req.body;
+        const { name, sku } = req.body;
 
         if (!name?.trim()) {
-            return res.status(400).json({ message: "name is required" });
+            return res.status(400).json({ message: "Product name is required." });
+        }
+
+        if (!sku?.trim()) {
+            return res.status(400).json({ message: "Product SKU is required." });
         }
 
         const slug = req.body.slug?.trim() || createSlug(name);
         req.body.slug = slug;
+        req.body.sku = sku.trim();
 
-        const existing = await ProductModel.findOne({ slug });
-        if (existing) {
+        const existingSlug = await ProductModel.findOne({ slug });
+        if (existingSlug) {
             return res.status(409).json({
                 message: "Slug already exists. Please use a different product name."
+            });
+        }
+
+        const existingSku = await ProductModel.findOne({ sku: req.body.sku });
+        if (existingSku) {
+            return res.status(409).json({
+                message: "SKU already exists. Please use a different product SKU."
             });
         }
 

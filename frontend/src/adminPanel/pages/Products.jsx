@@ -1,46 +1,35 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Plus, Search, Filter, Eye, Pencil, Trash2 } from "lucide-react";
+import { Plus, Search, Filter, Eye, Pencil, Trash2, Images  } from "lucide-react";
 import styles from "../assets/css/products.module.css";
+import { fetchProductsAPI } from "../apis/services/product.service";
 
 function Products() {
-    const products = [
-        {
-            id: "PRD-1001",
-            name: "Premium Wireless Headphones",
-            category: "Electronics",
-            price: "4,999",
-            stock: 42,
-            status: "Active",
-            sku: "HDP-WLS-001",
-        },
-        {
-            id: "PRD-1002",
-            name: "Organic Cotton T-Shirt",
-            category: "Fashion",
-            price: "899",
-            stock: 130,
-            status: "Active",
-            sku: "TSH-ORG-210",
-        },
-        {
-            id: "PRD-1003",
-            name: "Smart LED Desk Lamp",
-            category: "Home Decor",
-            price: "1,799",
-            stock: 8,
-            status: "Low Stock",
-            sku: "LMP-SMT-051",
-        },
-        {
-            id: "PRD-1004",
-            name: "Stainless Steel Water Bottle",
-            category: "Lifestyle",
-            price: "699",
-            stock: 0,
-            status: "Out of Stock",
-            sku: "BTL-STL-087",
-        },
-    ];
+    const [products, setProducts] = useState([]);
+
+    useEffect(() => {
+        fetchProducts();
+    }, []);
+
+    async function fetchProducts() {
+        try {
+            const productList = await fetchProductsAPI();
+            setProducts(productList || []);
+        } catch (error) {
+            console.error("Error fetching products:", error);
+        }
+    }
+
+    const totalProducts = products.length;
+    const activeListings = products.filter(
+        (product) => product.productVisibility === "Show on Storefront"
+    ).length;
+    const lowStockProducts = products.filter(
+        (product) => product.stockStatus === "Low Stock"
+    ).length;
+    const outOfStockProducts = products.filter(
+        (product) => product.stockStatus === "Out of Stock"
+    ).length;
 
     return (
         <section className={styles.page}>
@@ -66,26 +55,26 @@ function Products() {
             <section className={styles.statsGrid}>
                 <article className={styles.statCard}>
                     <p className={styles.statLabel}>Total Products</p>
-                    <h3>248</h3>
+                    <h3>{totalProducts}</h3>
                     <span className={styles.statHint}>
                         Across all categories
                     </span>
                 </article>
                 <article className={styles.statCard}>
                     <p className={styles.statLabel}>Active Listings</p>
-                    <h3>219</h3>
+                    <h3>{activeListings}</h3>
                     <span className={styles.statHint}>
                         Visible to customers
                     </span>
                 </article>
                 <article className={styles.statCard}>
                     <p className={styles.statLabel}>Low Stock</p>
-                    <h3>17</h3>
+                    <h3>{lowStockProducts}</h3>
                     <span className={styles.statHint}>Needs replenishment</span>
                 </article>
                 <article className={styles.statCard}>
                     <p className={styles.statLabel}>Out of Stock</p>
-                    <h3>12</h3>
+                    <h3>{outOfStockProducts}</h3>
                     <span className={styles.statHint}>
                         Currently unavailable
                     </span>
@@ -114,7 +103,7 @@ function Products() {
                             <tr>
                                 <th>Product</th>
                                 <th>Category</th>
-                                <th>Price</th>
+                                <th>Total Images</th>
                                 <th>Stock</th>
                                 <th>Status</th>
                                 <th>SKU</th>
@@ -122,73 +111,94 @@ function Products() {
                             </tr>
                         </thead>
                         <tbody>
-                            {products.map((product) => (
-                                <tr key={product.id}>
-                                    <td>
-                                        <div className={styles.productCell}>
-                                            <div
-                                                className={styles.productThumb}
-                                            >
-                                                {product.name.charAt(0)}
-                                            </div>
-                                            <div>
-                                                <p
-                                                    className={
-                                                        styles.productName
-                                                    }
-                                                >
-                                                    {product.name}
-                                                </p>
-                                                <span
-                                                    className={styles.productId}
-                                                >
-                                                    {product.id}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>{product.category}</td>
-                                    <td>Rs. {product.price}</td>
-                                    <td>{product.stock}</td>
-                                    <td>
-                                        <span
-                                            className={`${styles.statusBadge} ${
-                                                product.status === "Active"
-                                                    ? styles.active
-                                                    : product.status ===
-                                                        "Low Stock"
-                                                      ? styles.lowStock
-                                                      : styles.outOfStock
-                                            }`}
-                                        >
-                                            {product.status}
-                                        </span>
-                                    </td>
-                                    <td>{product.sku}</td>
-                                    <td>
-                                        <div className={styles.actionGroup}>
-                                            <button
-                                                type="button"
-                                                aria-label="View product"
-                                            >
-                                                <Eye size={16} />
-                                            </button>
-                                            <button
-                                                type="button"
-                                                aria-label="Edit product"
-                                            >
-                                                <Pencil size={16} />
-                                            </button>
-                                            <button
-                                                type="button"
-                                                aria-label="Delete product"
-                                            >
-                                                <Trash2 size={16} />
-                                            </button>
-                                        </div>
-                                    </td>
+                            {products.length === 0 ? (
+                                <tr>
+                                    <td colSpan="7">No products found.</td>
                                 </tr>
-                            ))}
+                            ) : (
+                                products.map((product) => {
+                                    const productId = product._id || product.id;
+                                    const productImage =
+                                        product.images?.cloud || product.images?.local;
+                                    const stockStatus =
+                                        product.stockStatus || "Out of Stock";
+
+                                    return (
+                                        <tr key={productId}>
+                                            <td>
+                                                <div className={styles.productCell}>
+                                                    <div className={styles.productThumb}>
+                                                        {productImage ? (
+                                                            <img
+                                                                src={productImage}
+                                                                alt={product.name}
+                                                                style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                                                            />
+                                                        ) : (
+                                                            product.name?.charAt(0) || "P"
+                                                        )}
+                                                    </div>
+                                                    <div>
+                                                        <p className={styles.productName}>
+                                                            {product.name || "Unnamed Product"}
+                                                        </p>
+                                                        <span className={styles.productId}>
+                                                            {productId}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>{product.category || "—"}</td>
+                                            <td>{product.totalImagesUploaded ?? 0}</td>
+                                            <td>{product.stockQuantity ?? 0}</td>
+                                            <td>
+                                                <span
+                                                    className={`${styles.statusBadge} ${
+                                                        stockStatus === "In Stock"
+                                                            ? styles.active
+                                                            : stockStatus === "Low Stock"
+                                                              ? styles.lowStock
+                                                              : styles.outOfStock
+                                                    }`}
+                                                >
+                                                    {stockStatus}
+                                                </span>
+                                            </td>
+                                            <td>{product.sku || "—"}</td>
+                                            <td>
+                                                <div className={styles.actionGroup}>
+                                                    <Link
+                                                        to={`/adminPanel/products/${productId}/photos`}
+                                                        state={{ product }}
+                                                        className={styles.photosButton}
+                                                    >
+                                                        <Images size={16} />
+                                                        Add More Photos
+                                                    </Link>
+                                                    <button
+                                                        type="button"
+                                                        aria-label="View product"
+                                                    >
+                                                        <Eye size={16} />
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        aria-label="Edit product"
+                                                    >
+                                                        <Pencil size={16} />
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        aria-label="Delete product"
+                                                    >
+                                                        <Trash2 size={16} />
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    );
+                                })
+                            )}
                         </tbody>
                     </table>
                 </div>

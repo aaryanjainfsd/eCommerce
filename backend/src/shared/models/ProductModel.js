@@ -8,17 +8,17 @@ const productSchema = new Schema(
         category: { type: String, required: true, trim: true },
         sellingPrice: { type: Number, required: true, min: 0 },
         stockQuantity: { type: Number, required: true, min: 0, default: 0 },
+        sku: { type: String, trim: true, required: true, unique: true },
         stockStatus: {
             type: String,
             required: true,
             enum: ["In Stock", "Low Stock", "Out of Stock", "Pre Order"],
             default: "In Stock"
         },
-        shortDescription: { type: String, required: true, trim: true },
+        shortDescription: { type: String, trim: true, default: "" },
 
         // Step 2: Images & Extra Details
         brand: { type: String, trim: true, default: "" },
-        sku: { type: String, trim: true, default: "" },
         mrp: { type: Number, min: 0, default: 0 },
         images: {
             local: { type: String, default: "" },

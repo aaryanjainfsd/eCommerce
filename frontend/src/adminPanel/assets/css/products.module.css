@@ -147,7 +147,7 @@
 .table {
     width: 100%;
     border-collapse: collapse;
-    min-width: 900px;
+    min-width: 620px;
 }
 
 .table th,
@@ -230,6 +230,7 @@
     display: inline-flex;
     align-items: center;
     gap: 0.38rem;
+    flex-wrap: wrap;
 }
 
 .actionGroup button {
@@ -249,6 +250,24 @@
 .actionGroup button:hover {
     background: #f0f7fd;
     border-color: #b8d2e3;
+}
+
+.photosButton {
+    text-decoration: none;
+    border: 1px solid #bfd7e6;
+    background: #eef7fd;
+    color: #17506d;
+    border-radius: 0.55rem;
+    padding: 0.42rem 0.7rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.82rem;
+    font-weight: 700;
+}
+
+.photosButton:hover {
+    background: #dff1fc;
 }
 
 @media (max-width: 1100px) {
