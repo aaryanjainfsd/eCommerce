@@ -16,7 +16,7 @@ const authRouter = Router();
  * /storefront/auth/get:
  *   get:
  *     summary: Get all storefront users
- *     tags: [Storefront Auth]
+ *     tags: ['Storefront Auth']
  *     responses:
  *       200:
  *         description: Users fetched successfully
@@ -28,7 +28,7 @@ authRouter.get('/get', getAllUsers);
  * /storefront/auth/login:
  *   post:
  *     summary: Login storefront user
- *     tags: [Storefront Auth]
+ *     tags: ['Storefront Auth']
  *     requestBody:
  *       required: true
  *       content:
@@ -56,7 +56,7 @@ authRouter.post('/login', loginUser);
  * /storefront/auth/get/{id}:
  *   get:
  *     summary: Get storefront user by id
- *     tags: [Storefront Auth]
+ *     tags: ['Storefront Auth']
  *     parameters:
  *       - in: path
  *         name: id
@@ -76,7 +76,7 @@ authRouter.get('/get/:id', getSingleUser);
  * /storefront/auth/update/{id}:
  *   put:
  *     summary: Update storefront user by id
- *     tags: [Storefront Auth]
+ *     tags: ['Storefront Auth']
  *     parameters:
  *       - in: path
  *         name: id
@@ -102,7 +102,7 @@ authRouter.put('/update/:id', updateUser);
  * /storefront/auth/register:
  *   post:
  *     summary: Register storefront user
- *     tags: [Storefront Auth]
+ *     tags: ['Storefront Auth']
  *     requestBody:
  *       required: true
  *       content:
@@ -138,7 +138,7 @@ authRouter.post('/register', registerUser);
  * /storefront/auth/delete/{id}:
  *   delete:
  *     summary: Delete storefront user by id
- *     tags: [Storefront Auth]
+ *     tags: ['Storefront Auth']
  *     parameters:
  *       - in: path
  *         name: id

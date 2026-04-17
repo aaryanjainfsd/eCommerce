@@ -28,6 +28,7 @@ export default function ProductDetails() {
     // -------------------------
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const [isInCart, setIsInCart] = useState(false);
     const [quantity, setQuantity] = useState(1);
 
@@ -49,7 +50,7 @@ export default function ProductDetails() {
     useEffect(() => {
         if (!product) return;
 
-        const existing = cart.find((item) => item.id === product.product._id);
+        const existing = cart.find((item) => item.id === product._id);
 
         if (existing) {
             setIsInCart(true);
@@ -64,33 +65,36 @@ export default function ProductDetails() {
         try {
             setLoading(true);
             const response = await instance.get("/products/get/" + id);
+            const foundProduct = response.data?.product;
 
-            if (response.data.length === 0) {
-                setLoading(false);
-                setError("Check the ID parameter");
+            if (!foundProduct) {
+                setError("Product not found. Please check the ID.");
+                setProduct(null);
             } else {
-                setProduct(response.data);
-                setLoading(false);
+                setProduct(foundProduct);
+                setError(null);
             }
         } catch (error) {
             console.log(error);
-            setError("Check the ID parameter");
+            setError("Unable to fetch product details.");
+            setProduct(null);
+        } finally {
             setLoading(false);
         }
     }
 
     // -------------------------
-    // CART ACTIONS (NOW VERY SIMPLE)
+    // CART ACTIONS
     // -------------------------
     function handleAddToCart() {
-        addToCart(product.product._id, quantity);
+        addToCart(product._id, quantity);
     }
 
     function handleIncrease() {
         if (!isInCart) {
             setQuantity((prev) => prev + 1);
         } else {
-            increaseQty(product.product._id);
+            increaseQty(product._id);
         }
     }
 
@@ -98,17 +102,18 @@ export default function ProductDetails() {
         if (!isInCart) {
             setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
         } else {
-            decreaseQty(product.product._id);
+            decreaseQty(product._id);
         }
     }
 
     function handleRemoveFromCart() {
-        removeFromCart(product.product._id);
+        removeFromCart(product._id);
         setIsInCart(false);
         setQuantity(1);
     }
 
     if (loading) return <p className="loading-text">Loading product details...</p>;
+    if (error) return <p className="error-text">{error}</p>;
     if (!product) return <p className="error-text">Product not found.</p>;
 
     return (
@@ -116,83 +121,52 @@ export default function ProductDetails() {
             <div className="product-wrapper">
                 <div className="product-image-box">
                     <img
-                        src={product.product.image}
-                        alt={product.product.title}
+                        src={product.data?.images?.cloud || product.data?.images?.local || ""}
+                        alt={product.data?.name || "Product image"}
                         className="product-main-img"
                     />
                 </div>
 
                 <div className="product-info-box">
-                    <h1 className="product-title">{product.product.name}</h1>
-                    <p className="product-code">Code: {product.product.code}</p>
+                    <h1 className="product-title">{product.data?.name}</h1>
+                    <p className="product-code">SKU: {product.data?.sku}</p>
 
                     <p className="product-desc">
-                        {product.product.description}
+                        {product.data?.shortDescription || "No description available."}
                     </p>
 
                     <div className="product-price-box">
                         <span className="product-price">
-                            {currency}{" "}
-                            {convert(
-                                Number(product.product.orignalPrice)
-                            ).toFixed(2)}
+                            {currency} {convert(Number(product.data?.sellingPrice) || 0).toFixed(2)}
                         </span>
-                        <span className="price-tag">
-                            Inclusive of all taxes
-                        </span>
+                        <span className="price-tag">Inclusive of all taxes</span>
                     </div>
 
-                    {/* Quantity selector */}
                     <div className="quantity-container">
                         <p className="quantity-label">Quantity</p>
                         <div className="quantity-controls">
-                            <button
-                                className="qty-btn"
-                                onClick={handleDecrease}
-                            >
+                            <button className="qty-btn" onClick={handleDecrease}>
                                 −
                             </button>
                             <span className="qty-value">{quantity}</span>
-                            <button
-                                className="qty-btn"
-                                onClick={handleIncrease}
-                            >
-                                {" "}
+                            <button className="qty-btn" onClick={handleIncrease}>
                                 +
                             </button>
                         </div>
                     </div>
 
-                    {/* Action buttons */}
                     <div className="product-action-buttons">
                         {!isInCart ? (
-                            <button
-                                onClick={() =>
-                                    handleAddToCart(
-                                        product.product._id,
-                                        quantity
-                                    )
-                                }
-                                className="btn-add-cart"
-                            >
-                                {" "}
-                                Add to Cart{" "}
+                            <button onClick={handleAddToCart} className="btn-add-cart">
+                                Add to Cart
                             </button>
                         ) : (
-                            <button
-                                onClick={() =>
-                                    handleRemoveFromCart(product.product._id)
-                                }
-                                className="btn-remove-cart"
-                            >
-                                {" "}
-                                🗑️ Remove from Cart{" "}
+                            <button onClick={handleRemoveFromCart} className="btn-remove-cart">
+                                🗑️ Remove from Cart
                             </button>
                         )}
                         <NavLink to="/cart">
-                            <button className="btn-buy-now">
-                                ⚡ Go to Cart
-                            </button>
+                            <button className="btn-buy-now">⚡ Go to Cart</button>
                         </NavLink>
                     </div>
                 </div>

@@ -1,6 +1,5 @@
-import ProductMultipleImagesModel from "../models/ProductImagesModel.js";
-import ProductModel from '../models/ProductModel.js';
-
+import ProductMultipleImagesModel from "../models/ProductImages.model.js";
+import ProductModel from '../models/Product.model.js';
 
 export async function getProducts(req, res) {
     try {
@@ -25,13 +24,17 @@ export async function getProducts(req, res) {
                         $add: [
                             {
                                 $cond: [
-                                    { $or: [{ $ifNull: ["$images.cloud", false] }, { $ifNull: ["$images.local", false] }] },
+                                    {
+                                        $or: [
+                                            { $ifNull: ["$data.images.cloud", false] },
+                                            { $ifNull: ["$data.images.local", false] }
+                                        ]
+                                    },
                                     1,
                                     0
                                 ]
                             },
-                            { $size: { $ifNull: ["$imagesInfo.images.local", []] } },
-                            { $size: { $ifNull: ["$imagesInfo.images.cloud", []] } }
+                            { $size: { $ifNull: ["$imagesInfo.images.local", []] } }
                         ]
                     }
                 }
@@ -45,7 +48,7 @@ export async function getProducts(req, res) {
 
         res.status(200).json({
             message: "Products fetched successfully",
-            products: products
+            products
         });
     } catch (error) {
         console.error("Error fetching products:", error);
@@ -56,34 +59,48 @@ export async function getProducts(req, res) {
     }
 }
 
-export async function addProduct(req, res) 
-{
-    try 
-    {
-        console.log("Request Body:", req.body);
-        const payload = { ...req.body }; 
-    
-        payload.images = {
-			local: "",
-			cloud: ""
-		};
+export async function addProduct(req, res) {
+    try {
+        const { client_id, ...rest } = req.body;
 
-		if (req.localImage) {
-			payload.images.local = req.localImage.url;
-		}
+        if (!client_id) {
+            return res.status(400).json({
+                message: "client_id is required"
+            });
+        }
 
-		if (req.uploadedImage) {
-			payload.images.cloud = req.uploadedImage.url;
-		}
+        const newProductPayload = {
+            foreignKeys: {
+                client_id,
+                future_sample_id: `product_${Date.now()}`
+            },
+            data: {
+                name: rest.name,
+                slug: rest.slug,
+                category: rest.category,
+                sellingPrice: Number(rest.sellingPrice) || 0,
+                stockQuantity: Number(rest.stockQuantity) || 0,
+                sku: rest.sku,
+                stockStatus: rest.stockStatus || "In Stock",
+                shortDescription: rest.shortDescription || "",
+                brand: rest.brand || "",
+                mrp: Number(rest.mrp) || 0,
+                images: {
+                    local: req.localImage?.url || "",
+                    cloud: req.uploadedImage?.url || ""
+                },
+                productVisibility: rest.productVisibility || "Show on Storefront",
+                productLabel: rest.productLabel || "Standard Product"
+            }
+        };
 
-        const newProduct = await ProductModel.create(payload);
+        const newProduct = await ProductModel.create(newProductPayload);
+
         res.status(201).json({
             message: "Product added successfully",
-            product: newProduct,
+            product: newProduct.toObject()
         });
-    } 
-    catch (error) 
-    {
+    } catch (error) {
         console.error("Error adding product:", error);
         res.status(500).json({
             message: "Failed to add product",
@@ -93,11 +110,77 @@ export async function addProduct(req, res)
 }
 
 export async function updateProduct(req, res) {
-    console.log(req.body);
+    try {
+        const { id } = req.params;
+        const { client_id, ...rest } = req.body;
+
+        const updateFields = {};
+
+        Object.entries(rest).forEach(([key, value]) => {
+            if (key === "image") return;
+            updateFields[`data.${key}`] = value;
+        });
+
+        if (req.localImage) {
+            updateFields["data.images.local"] = req.localImage.url;
+        }
+
+        if (req.uploadedImage) {
+            updateFields["data.images.cloud"] = req.uploadedImage.url;
+        }
+
+        if (client_id) {
+            updateFields["foreignKeys.client_id"] = client_id;
+        }
+
+        const updatedProduct = await ProductModel.findByIdAndUpdate(
+            id,
+            { $set: updateFields },
+            { new: true }
+        );
+
+        if (!updatedProduct) {
+            return res.status(404).json({
+                message: "Product not found"
+            });
+        }
+
+        res.status(200).json({
+            message: "Product updated successfully",
+            product: updatedProduct.toObject()
+        });
+    } catch (error) {
+        console.error("Error updating product:", error);
+        res.status(500).json({
+            message: "Failed to update product",
+            error: error.message
+        });
+    }
 }
 
 export async function deleteProduct(req, res) {
-    console.log(req.body);
+    try {
+        const { id } = req.params;
+
+        const deletedProduct = await ProductModel.findByIdAndDelete(id);
+
+        if (!deletedProduct) {
+            return res.status(404).json({
+                message: "Product not found"
+            });
+        }
+
+        res.status(200).json({
+            message: "Product deleted successfully",
+            product: deletedProduct.toObject()
+        });
+    } catch (error) {
+        console.error("Error deleting product:", error);
+        res.status(500).json({
+            message: "Failed to delete product",
+            error: error.message
+        });
+    }
 }
 
 export async function getSingleProduct(req, res) {
@@ -113,15 +196,15 @@ export async function getSingleProduct(req, res) {
 		}
 		return res.status(200).json({
 			message: "Product fetched successfully",
-			product: product
-		});
-	} catch (error) {
-		console.error("Error fetching product:", error);
-		return res.status(500).json({
-			message: "Failed to fetch product",
-			error: error.message
-		});
-	}
+            product: product.toObject()
+        });
+    } catch (error) {
+        console.error("Error fetching product:", error);
+        return res.status(500).json({
+            message: "Failed to fetch product",
+            error: error.message
+        });
+    }
 }
 
 export async function addMultipleProductImages(req, res) 

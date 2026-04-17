@@ -1,5 +1,5 @@
 // backend/middlewear/validateNewProduct.js
-import ProductModel from "../models/ProductModel.js";
+import ProductModel from "../models/Product.model.js";
 
 function createSlug(value = "") {
     return value
@@ -22,18 +22,22 @@ export default async function validateNewProduct(req, res, next) {
             return res.status(400).json({ message: "Product SKU is required." });
         }
 
+        if (!req.file) {
+            return res.status(400).json({ message: "Product image is required." });
+        }
+
         const slug = req.body.slug?.trim() || createSlug(name);
         req.body.slug = slug;
         req.body.sku = sku.trim();
 
-        const existingSlug = await ProductModel.findOne({ slug });
+        const existingSlug = await ProductModel.findOne({ "data.slug": slug });
         if (existingSlug) {
             return res.status(409).json({
                 message: "Slug already exists. Please use a different product name."
             });
         }
 
-        const existingSku = await ProductModel.findOne({ sku: req.body.sku });
+        const existingSku = await ProductModel.findOne({ "data.sku": req.body.sku });
         if (existingSku) {
             return res.status(409).json({
                 message: "SKU already exists. Please use a different product SKU."

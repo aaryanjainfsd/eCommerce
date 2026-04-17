@@ -19,13 +19,12 @@ const productRouter = Router();
  *   description: Shared product APIs
  */
 
-// Redirecting to controller functions
 /**
  * @swagger
  * /shared/products/get:
  *   get:
  *     summary: Get all products
- *     tags: [Storefront Products]
+ *     tags: ['Storefront Products']
  *     responses:
  *       200:
  *         description: Products fetched successfully
@@ -37,7 +36,7 @@ productRouter.get('/get', getProducts);
  * /shared/products/add:
  *   post:
  *     summary: Add product with image upload
- *     tags: [Storefront Products]
+ *     tags: ['Storefront Products']
  *     requestBody:
  *       required: true
  *       content:
@@ -120,7 +119,7 @@ productRouter.post('/add',
  * /shared/products/get/{id}:
  *   get:
  *     summary: Get single product by id
- *     tags: [Storefront Products]
+ *     tags: ['Storefront Products']
  *     parameters:
  *       - in: path
  *         name: id
@@ -140,7 +139,7 @@ productRouter.get('/get/:id', getSingleProduct);
  * /shared/products/update/{id}:
  *   put:
  *     summary: Update product by id
- *     tags: [Storefront Products]
+ *     tags: ['Storefront Products']
  *     parameters:
  *       - in: path
  *         name: id
@@ -158,7 +157,7 @@ productRouter.put('/update/:id', (useCloud ? mainImgUploadCloudMw : mainImgUploa
  * /shared/products/delete/{id}:
  *   delete:
  *     summary: Delete product by id
- *     tags: [Storefront Products]
+ *     tags: ['Storefront Products']
  *     parameters:
  *       - in: path
  *         name: id
@@ -171,6 +170,40 @@ productRouter.put('/update/:id', (useCloud ? mainImgUploadCloudMw : mainImgUploa
  */
 productRouter.delete('/delete/:id', deleteProduct);
 
+/**
+ * @swagger
+ * /shared/products/add-images/{productId}:
+ *   post:
+ *     summary: Add multiple product images
+ *     tags: ['Storefront Products']
+ *     parameters:
+ *       - in: path
+ *         name: productId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             required: [images]
+ *             properties:
+ *               images:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   format: binary
+ *                 maxItems: 10
+ *     responses:
+ *       201:
+ *         description: Product images added successfully
+ *       400:
+ *         description: Invalid product ID or images
+ *       404:
+ *         description: Product not found
+ */
 productRouter.post('/add-images/:productId',
     // Middlewears
     parseMultipart.array("images", 10), 

@@ -70,6 +70,10 @@ function Cart() {
         }
     }
 
+    function handleDelete(productId) {
+        removeFromCart(productId);
+    }
+
     if (cartItems.length === 0) {
         return (
             <div className="empty-cart-container">
@@ -105,20 +109,40 @@ function Cart() {
                     return (
                         <div className="row-item" key={item.product._id}>
                             <div className="left-product-info">
-                                <img src={item.product.image} className="prod-img" alt={item.product.name} />
+                                <img
+                                    src={item.product.images?.cloud || item.product.images?.local || ""}
+                                    className="prod-img"
+                                    alt={item.product.name}
+                                />
 
                                 <div className="prod-details">
                                     <h3 className="prod-title"> {item.product.name} </h3>
-                                    <p className="prod-meta"> Price: {currency}{" "} {item.product.discountedPrice} </p>
+                                    <p className="prod-meta">
+                                        Price: {currency} {item.product.sellingPrice}
+                                    </p>
                                     <p className="prod-meta">In Stock</p>
-                                    <div className="small-actions"> <span onClick={() => handleDelete(item._id)} > Remove </span> </div>
+                                    <div className="small-actions">
+                                        <span onClick={() => handleDelete(item.product._id)}>
+                                            Remove
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
 
-                            <div className="each-price"> {currency}{" "} {item.product.discountedPrice} </div>
+                            <div className="each-price">
+                                {currency} {item.product.sellingPrice}
+                            </div>
 
                             <div className="qty-select-box">
-                                <select value={item.quantity} onChange={(e) => { handleQuantityChange( item.product._id, Number(e.target.value) ); }} >
+                                <select
+                                    value={item.quantity}
+                                    onChange={(e) => {
+                                        handleQuantityChange(
+                                            item.product._id,
+                                            Number(e.target.value)
+                                        );
+                                    }}
+                                >
                                     {[1, 2, 3, 4, 5, 6, 7, 8].map((q) => {
                                         return (
                                             <option key={q} value={q}>
@@ -130,10 +154,8 @@ function Cart() {
                             </div>
 
                             <div className="total-price">
-                                {currency}{" "}
-                                {(
-                                    convert(item.product.discountedPrice) *
-                                    item.quantity
+                                {currency} {(
+                                    convert(item.product.sellingPrice) * item.quantity
                                 ).toLocaleString("en-IN")}
                             </div>
                         </div>

@@ -1,141 +1,238 @@
-import { useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, ArrowRight, Save } from "lucide-react";
+import { ArrowLeft, Save, UploadCloud, CheckCircle2, XCircle, X } from "lucide-react";
 import { addProductAPI } from "../apis/services/product.service";
+import useAdminAuthStore from "../stores/adminAuthStore";
 import styles from "../assets/css/addProduct.module.css";
 
+const initialProductState = {
+    name: "",
+    slug: "",
+    category: "",
+    sellingPrice: "",
+    stockQuantity: "",
+    stockStatus: "In Stock",
+    shortDescription: "",
+    brand: "",
+    sku: "",
+    mrp: "",
+    image: null,
+    productVisibility: "Show on Storefront",
+    productLabel: "Standard Product",
+};
+
+function Popup({ show, type, message, onClose }) {
+    if (!show) return null;
+
+    const Icon = type === "success" ? CheckCircle2 : XCircle;
+
+    return (
+        <div className={styles.popupOverlay} onClick={onClose}>
+            <div className={styles.popupDialog} onClick={(event) => event.stopPropagation()}>
+                <button className={styles.popupClose} type="button" onClick={onClose} aria-label="Close popup">
+                    <X size={18} />
+                </button>
+
+                <div className={styles.popupIconWrapper}>
+                    <Icon className={`${styles.popupIcon} ${type === "success" ? styles.popupIconSuccess : styles.popupIconError}`} />
+                </div>
+
+                <h3 className={styles.popupTitle}>{type === "success" ? "Product added" : "Error"}</h3>
+                <p className={styles.popupMessage}>{message}</p>
+
+                <button className={styles.popupButton} type="button" onClick={onClose}>
+                    Close
+                </button>
+            </div>
+        </div>
+    );
+}
+
+function Loader() {
+    return <span className={styles.buttonLoader} aria-hidden="true" />;
+}
+
 function AddProduct() {
-    const [currentStep, setCurrentStep] = useState(1);
-    const totalSteps = 3;
+    const { user } = useAdminAuthStore();
+    const [productData, setProductData] = useState(initialProductState);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [fileInputKey, setFileInputKey] = useState(Date.now());
+    const [isSkuModified, setIsSkuModified] = useState(false);
+    const [isSlugModified, setIsSlugModified] = useState(false);
+    const [imagePreview, setImagePreview] = useState("");
+    const [showPopup, setShowPopup] = useState(false);
+    const [popupType, setPopupType] = useState("success");
+    const [popupMessage, setPopupMessage] = useState("");
+    const [resetAfterPopup, setResetAfterPopup] = useState(false);
 
-    const [productData, setProductData] = useState({
-        name: "",
-        category: "",
-        sellingPrice: "",
-        stockQuantity: "",
-        stockStatus: "In Stock",
-        shortDescription: "",
-        brand: "",
-        sku: "",
-        mrp: "",
-        image: null,
-        productVisibility: "Show on Storefront",
-        productLabel: "Standard Product",
-    });
-
-    const stepDetails = {
-        1: {
-            label: "Step 1 of 3",
-            title: "Basic Product Information",
-            description:
-                "Start with the essential product details, including SKU. This step must be completed first.",
-            badge: "Start Here",
-        },
-        2: {
-            label: "Step 2 of 3",
-            title: "Extra Details & Description",
-            description:
-                "Add optional description, brand and images. The short description is not required.",
-            badge: "Optional Step",
-        },
-        3: {
-            label: "Step 3 of 3",
-            title: "Publish Settings",
-            description:
-                "Choose how the product should appear after save, then submit when you are ready.",
-            badge: "Final Step",
-        },
-    };
-
-    const activeStep = stepDetails[currentStep];
-
-    function goToStep(step) {
-        setCurrentStep(step);
+    function formatSkuSegment(text, maxLength) {
+        return text
+            .trim()
+            .toUpperCase()
+            .replace(/[^A-Z0-9]+/g, "")
+            .slice(0, maxLength);
     }
 
-    function validateStep(step) {
-        if (step === 1) {
-            if (
-                !productData.name.trim() ||
-                !productData.category.trim() ||
-                !productData.sku.trim() ||
-                productData.sellingPrice === "" ||
-                productData.stockQuantity === ""
-            ) {
-                alert("Please complete all required fields in Step 1 before moving on.");
-                return false;
-            }
+    function generateSku(name, category) {
+        const categorySegment = formatSkuSegment(category, 2) || "XX";
+        const nameSegment = formatSkuSegment(name, 4) || "PRD";
+        const uniqueNumber = Math.floor(1000 + Math.random() * 9000);
+        return `${categorySegment}-${nameSegment}-${uniqueNumber}`;
+    }
+
+    function generateSlug(name) {
+        return name
+            .trim()
+            .toLowerCase()
+            .replace(/[^a-z0-9\s-]/g, "")
+            .replace(/\s+/g, "-")
+            .replace(/-+/g, "-")
+            .replace(/^-+|-+$/g, "");
+    }
+
+    useEffect(() => {
+        if (!productData.image) {
+            setImagePreview("");
+            return;
         }
 
-        return true;
+        const previewUrl = URL.createObjectURL(productData.image);
+        setImagePreview(previewUrl);
+
+        return () => {
+            URL.revokeObjectURL(previewUrl);
+        };
+    }, [productData.image]);
+
+    function openPopup(type, message, resetOnClose = false) {
+        setPopupType(type);
+        setPopupMessage(message);
+        setShowPopup(true);
+        setResetAfterPopup(resetOnClose);
     }
 
-    function handleNextStep() {
-        if (validateStep(currentStep)) {
-            setCurrentStep((prev) => Math.min(prev + 1, totalSteps));
+    function closePopup() {
+        setShowPopup(false);
+        if (resetAfterPopup) {
+            setProductData(initialProductState);
+            setFileInputKey(Date.now());
+            setIsSkuModified(false);
+            setIsSlugModified(false);
+            setResetAfterPopup(false);
         }
-    }
-
-    function handlePreviousStep() {
-        setCurrentStep((prev) => Math.max(prev - 1, 1));
     }
 
     function handleChange(event) {
         const { name, value, type, files } = event.target;
+        setProductData((prev) => {
+            const nextData = {
+                ...prev,
+                [name]: type === "file" ? files[0] : value,
+            };
 
-        setProductData((prev) => ({
-            ...prev,
-            [name]: type === "file" ? files[0] : value,
-        }));
+            if (name === "sku") {
+                setIsSkuModified(true);
+                return nextData;
+            }
+
+            if (name === "slug") {
+                setIsSlugModified(true);
+                return nextData;
+            }
+
+            if (name === "name") {
+                if (!isSlugModified) {
+                    nextData.slug = generateSlug(value);
+                }
+
+                if (!isSkuModified && value.trim() && prev.category.trim()) {
+                    nextData.sku = generateSku(value, prev.category);
+                }
+            }
+
+            if (name === "category" && !isSkuModified && prev.name.trim()) {
+                nextData.sku = generateSku(prev.name, value);
+            }
+
+            return nextData;
+        });
     }
 
     async function handleSubmit(event) {
         event.preventDefault();
 
+        if (!productData.name.trim()) {
+            openPopup("error", "Product name is required.");
+            return;
+        }
+
+        if (!productData.category.trim()) {
+            openPopup("error", "Product category is required.");
+            return;
+        }
+
         if (!productData.sku.trim()) {
-            alert("Product SKU is required before submitting.");
-            setCurrentStep(1);
+            openPopup("error", "Product SKU is required.");
+            return;
+        }
+
+        if (!productData.slug.trim()) {
+            openPopup("error", "Product slug is required.");
+            return;
+        }
+
+        if (!productData.brand.trim()) {
+            openPopup("error", "Brand is required.");
+            return;
+        }
+
+        if (productData.mrp === "" || Number(productData.mrp) < 0) {
+            openPopup("error", "Please enter a valid MRP.");
+            return;
+        }
+
+        if (productData.sellingPrice === "" || Number(productData.sellingPrice) < 0) {
+            openPopup("error", "Please enter a valid selling price.");
+            return;
+        }
+
+        if (productData.stockQuantity === "" || Number(productData.stockQuantity) < 0) {
+            openPopup("error", "Please enter a valid stock quantity.");
+            return;
+        }
+
+        if (!productData.image) {
+            openPopup("error", "Product main image is required.");
             return;
         }
 
         const formData = new FormData();
-
         Object.entries(productData).forEach(([key, value]) => {
             if (key === "image") {
-                if (value) formData.append("image", value);
+                formData.append("image", value);
             } else if (value !== "") {
                 formData.append(key, value);
             }
         });
 
+        const clientIdValue = typeof user?.client_id === "string"
+            ? user.client_id
+            : user?.client_id?._id;
+
+        if (!clientIdValue) {
+            openPopup("error", "Unable to add product: missing client_id.");
+            return;
+        }
+
+        formData.append("client_id", clientIdValue);
+
         try {
             setIsSubmitting(true);
-
             const result = await addProductAPI(formData);
-            console.log("Server Response:", result);
-
-            alert(result.message || "Product added successfully!");
-
-            setProductData({
-                name: "",
-                category: "",
-                sellingPrice: "",
-                stockQuantity: "",
-                stockStatus: "In Stock",
-                shortDescription: "",
-                brand: "",
-                sku: "",
-                mrp: "",
-                image: null,
-                productVisibility: "Show on Storefront",
-                productLabel: "Standard Product",
-            });
-
-            setCurrentStep(1);
+            openPopup("success", result?.message || "Product added successfully.", true);
         } catch (error) {
             console.error("Submit error:", error);
-            alert(error?.message || error?.error || "Failed to add product");
+            openPopup("error", error?.message || error?.error || "Failed to add product.");
         } finally {
             setIsSubmitting(false);
         }
@@ -143,9 +240,12 @@ function AddProduct() {
 
     return (
         <section className={styles.page}>
+            <Popup show={showPopup} type={popupType} message={popupMessage} onClose={closePopup} />
+
             <header className={styles.pageHeader}>
                 <div>
-                    <h1 className={styles.title}>Add New Product</h1>                   
+                    <p className={styles.pageTag}>Admin • Add New Product</p>
+                    {/* <h1 className={styles.title}>Add New Product</h1> */}
                 </div>
 
                 <Link to="/adminPanel/products" className={styles.backLink}>
@@ -154,312 +254,224 @@ function AddProduct() {
                 </Link>
             </header>
 
-     
-
-            <div className={styles.stepper}>
-                <button
-                    type="button"
-                    className={`${styles.stepItem} ${currentStep === 1 ? styles.stepActive : ""}`}
-                    onClick={() => goToStep(1)}
-                >
-                    <span className={styles.stepNumber}>1</span>
-                    <div>
-                        <strong>Basic Product Info</strong>
-                        <p>Fill this first</p>
-                    </div>
-                </button>
-
-                <button
-                    type="button"
-                    className={`${styles.stepItem} ${currentStep === 2 ? styles.stepActive : ""}`}
-                    onClick={() => goToStep(2)}
-                >
-                    <span className={styles.stepNumber}>2</span>
-                    <div>
-                        <strong>Images & Extras</strong>
-                        <p>Optional details</p>
-                    </div>
-                </button>
-
-                <button
-                    type="button"
-                    className={`${styles.stepItem} ${currentStep === 3 ? styles.stepActive : ""}`}
-                    onClick={() => goToStep(3)}
-                >
-                    <span className={styles.stepNumber}>3</span>
-                    <div>
-                        <strong>Publish Settings</strong>
-                        <p>Finish and submit</p>
-                    </div>
-                </button>
-            </div>
-
             <form className={styles.formCard} noValidate onSubmit={handleSubmit} encType="multipart/form-data">
-                <div className={styles.stepHeader}>
+                <div className={styles.formTop}>
                     <div>
-                        <p className={styles.sectionLabel}>{activeStep.label}</p>
-                        <h2>{activeStep.title}</h2>
-                        <p className={styles.stepHeaderText}>{activeStep.description}</p>
+                        <span className={styles.formBadge}>Product setup</span>
+                        <p className={styles.formIntro}>
+                            Fill in the required fields, then choose storefront visibility and labels to complete the listing.
+                        </p>
                     </div>
-                    <span className={styles.liveBadge}>{activeStep.badge}</span>
                 </div>
 
                 <div className={styles.formBody}>
-                {currentStep === 1 && (
-                    <>
-                        <div className={styles.gridTwo}>
-                            <label>
+                    <div className={styles.inputRow}>
+                        <div className={styles.inputBlock}>
+                            <label className={styles.inputLabel} htmlFor="name">
                                 Product Name <span className={styles.requiredMark}>*</span>
-                                <span className={styles.fieldHint}>
-                                    Example: Premium Wireless Headphones
-                                </span>
-                                <input
-                                    type="text"
-                                    name="name"
-                                    value={productData.name}
-                                    onChange={handleChange}
-                                    placeholder="Enter product name"
-                                    required
-                                />
                             </label>
-
-                            <label>
-                                Category <span className={styles.requiredMark}>*</span>
-                                <span className={styles.fieldHint}>
-                                    Select the closest category
-                                </span>
-                                <select
-                                    name="category"
-                                    value={productData.category}
-                                    onChange={handleChange}
-                                    required
-                                >
-                                    <option value="">Select category</option>
-                                    <option value="Electronics">Electronics</option>
-                                    <option value="Fashion">Fashion</option>
-                                    <option value="Home Decor">Home Decor</option>
-                                    <option value="Groceries">Groceries</option>
-                                </select>
-                            </label>
-                        </div>
-
-                        <div className={styles.gridThree}>
-                            <label>
-                                Selling Price (Rs.) <span className={styles.requiredMark}>*</span>
-                                <span className={styles.fieldHint}>Example: 1499</span>
-                                <input
-                                    type="number"
-                                    name="sellingPrice"
-                                    value={productData.sellingPrice}
-                                    onChange={handleChange}
-                                    placeholder="0"
-                                    min="0"
-                                    required
-                                />
-                            </label>
-
-                            <label>
-                                Stock Quantity <span className={styles.requiredMark}>*</span>
-                                <span className={styles.fieldHint}>
-                                    How many units are available?
-                                </span>
-                                <input
-                                    type="number"
-                                    name="stockQuantity"
-                                    value={productData.stockQuantity}
-                                    onChange={handleChange}
-                                    placeholder="0"
-                                    min="0"
-                                    required
-                                />
-                            </label>
-
-                            <label>
-                                Stock Status <span className={styles.requiredMark}>*</span>
-                                <span className={styles.fieldHint}>
-                                    Pick the current availability
-                                </span>
-                                <select
-                                    name="stockStatus"
-                                    value={productData.stockStatus}
-                                    onChange={handleChange}
-                                    required
-                                >
-                                    <option value="In Stock">In Stock</option>
-                                    <option value="Low Stock">Low Stock</option>
-                                    <option value="Out of Stock">Out of Stock</option>
-                                    <option value="Pre Order">Pre Order</option>
-                                </select>
-                            </label>
-                        </div>
-
-                        <label>
-                            SKU <span className={styles.requiredMark}>*</span>
-                            <span className={styles.fieldHint}>
-                                Unique product code for internal tracking
-                            </span>
                             <input
+                                id="name"
+                                name="name"
                                 type="text"
+                                value={productData.name}
+                                onChange={handleChange}
+                                placeholder="Type product name"
+                            />
+                        </div>
+                        <div className={styles.inputBlock}>
+                            <label className={styles.inputLabel} htmlFor="category">
+                                Category <span className={styles.requiredMark}>*</span>
+                            </label>
+                            <select id="category" name="category" value={productData.category} onChange={handleChange}>
+                                <option value="">Select category</option>
+                                <option value="Electronics">Electronics</option>
+                                <option value="Fashion">Fashion</option>
+                                <option value="Home Decor">Home Decor</option>
+                                <option value="Groceries">Groceries</option>
+                            </select>
+                        </div>
+                        <div className={styles.inputBlock}>
+                            <label className={styles.inputLabel} htmlFor="brand">
+                                Brand <span className={styles.requiredMark}>*</span>
+                            </label>
+                            <input
+                                id="brand"
+                                name="brand"
+                                type="text"
+                                value={productData.brand}
+                                onChange={handleChange}
+                                placeholder="Enter brand name"
+                            />
+                        </div>
+                    </div>
+
+                    <div className={styles.inputRow}>
+                        <div className={styles.inputBlock}>
+                            <label className={styles.inputLabel} htmlFor="mrp">
+                                MRP (Rs.) <span className={styles.requiredMark}>*</span>
+                            </label>
+                            <input
+                                id="mrp"
+                                name="mrp"
+                                type="number"
+                                min="0"
+                                value={productData.mrp}
+                                onChange={handleChange}
+                                placeholder="0"
+                            />
+                        </div>
+                        <div className={styles.inputBlock}>
+                            <label className={styles.inputLabel} htmlFor="sellingPrice">
+                                Selling Price (Rs.) <span className={styles.requiredMark}>*</span>
+                            </label>
+                            <input
+                                id="sellingPrice"
+                                name="sellingPrice"
+                                type="number"
+                                min="0"
+                                value={productData.sellingPrice}
+                                onChange={handleChange}
+                                placeholder="0"
+                            />
+                        </div>
+                        <div className={styles.inputBlock}>
+                            <label className={styles.inputLabel} htmlFor="stockQuantity">
+                                Stock Quantity <span className={styles.requiredMark}>*</span>
+                            </label>
+                            <input
+                                id="stockQuantity"
+                                name="stockQuantity"
+                                type="number"
+                                min="0"
+                                value={productData.stockQuantity}
+                                onChange={handleChange}
+                                placeholder="0"
+                            />
+                        </div>
+                    </div>
+
+                    <div className={styles.inputRow}>
+                        <div className={styles.inputBlock}>
+                            <label className={styles.inputLabel} htmlFor="stockStatus">
+                                Stock Status <span className={styles.requiredMark}>*</span>
+                            </label>
+                            <select id="stockStatus" name="stockStatus" value={productData.stockStatus} onChange={handleChange}>
+                                <option value="In Stock">In Stock</option>
+                                <option value="Low Stock">Low Stock</option>
+                                <option value="Out of Stock">Out of Stock</option>
+                                <option value="Pre Order">Pre Order</option>
+                            </select>
+                        </div>
+                        <div className={styles.inputBlock}>
+                            <label className={styles.inputLabel} htmlFor="sku">
+                                SKU <span className={styles.requiredMark}>*</span>
+                            </label>
+                            <input
+                                id="sku"
                                 name="sku"
+                                type="text"
                                 value={productData.sku}
                                 onChange={handleChange}
                                 placeholder="Ex: PRD-1001"
-                                required
                             />
-                        </label>
-                    </>
-                )}
-
-                {currentStep === 2 && (
-                    <>
-                        <div className={styles.gridThree}>
-                            <label>
-                                Brand
-                                <span className={styles.fieldHint}>Example: Boat, Nike, Samsung</span>
-                                <input
-                                    type="text"
-                                    name="brand"
-                                    value={productData.brand}
-                                    onChange={handleChange}
-                                    placeholder="Enter brand name"
-                                />
-                            </label>
-
-                            <label>
-                                MRP (Rs.)
-                                <span className={styles.fieldHint}>Original price if needed</span>
-                                <input
-                                    type="number"
-                                    name="mrp"
-                                    value={productData.mrp}
-                                    onChange={handleChange}
-                                    placeholder="0"
-                                    min="0"
-                                />
-                            </label>
-
-                            <label>
-                                Short Description
-                                <span className={styles.fieldHint}>
-                                    Optional summary for storefront cards and search.
-                                </span>
-                                <textarea
-                                    rows="4"
-                                    name="shortDescription"
-                                    value={productData.shortDescription}
-                                    onChange={handleChange}
-                                    placeholder="Example: Stylish, durable, and easy to use for everyday needs."
-                                />
-                            </label>
                         </div>
-
-                        <div className={styles.grid}>
-                            <label>
-                                Upload Product Main Image
-                                <span className={styles.fieldHint}>
-                                    Choose an image file now — upload handling will be connected later
-                                </span>
-                                <input
-                                    type="file"
-                                    name="image"
-                                    accept="image/*"
-                                    onChange={handleChange}
-                                    className={styles.fileInput}
-                                />
+                        <div className={styles.inputBlock}>
+                            <label className={styles.inputLabel} htmlFor="slug">
+                                Slug <span className={styles.requiredMark}>*</span>
                             </label>
+                            <input
+                                id="slug"
+                                name="slug"
+                                type="text"
+                                value={productData.slug}
+                                onChange={handleChange}
+                                placeholder="example-product-slug"
+                            />
                         </div>
-                    </>
-                )}
+                    </div>
 
-                {currentStep === 3 && (
-                    <>
-                        <div className={styles.gridTwo}>
-                            <label>
+                    <label className={styles.textareaLabel} htmlFor="shortDescription">
+                        Short Description
+                        <span className={styles.fieldHint}>A short summary for cards and search results.</span>
+                        <textarea
+                            id="shortDescription"
+                            name="shortDescription"
+                            rows="4"
+                            value={productData.shortDescription}
+                            onChange={handleChange}
+                            placeholder="Write a concise product description"
+                        />
+                    </label>
+
+                    <div className={styles.inputRow}>
+                        <div className={styles.inputBlock}>
+                            <label className={styles.inputLabel} htmlFor="productVisibility">
                                 Product Visibility
-                                <span className={styles.fieldHint}>
-                                    Decide where this product should appear
-                                </span>
-                                <select
-                                    name="productVisibility"
-                                    value={productData.productVisibility}
-                                    onChange={handleChange}
-                                >
-                                    <option value="Show on Storefront">Show on Storefront</option>
-                                    <option value="Keep in Draft Mode">Keep in Draft Mode</option>
-                                    <option value="Hide for Now">Hide for Now</option>
-                                </select>
                             </label>
-
-                            <label>
+                            <select
+                                id="productVisibility"
+                                name="productVisibility"
+                                value={productData.productVisibility}
+                                onChange={handleChange}
+                            >
+                                <option value="Show on Storefront">Show on Storefront</option>
+                                <option value="Keep in Draft Mode">Keep in Draft Mode</option>
+                                <option value="Hide for Now">Hide for Now</option>
+                            </select>
+                        </div>
+                        <div className={styles.inputBlock}>
+                            <label className={styles.inputLabel} htmlFor="productLabel">
                                 Product Label
-                                <span className={styles.fieldHint}>
-                                    Optional tag for better presentation
-                                </span>
-                                <select
-                                    name="productLabel"
-                                    value={productData.productLabel}
-                                    onChange={handleChange}
-                                >
-                                    <option value="Standard Product">Standard Product</option>
-                                    <option value="New Arrival">New Arrival</option>
-                                    <option value="Best Seller">Best Seller</option>
-                                    <option value="Featured Pick">Featured Pick</option>
-                                </select>
                             </label>
+                            <select
+                                id="productLabel"
+                                name="productLabel"
+                                value={productData.productLabel}
+                                onChange={handleChange}
+                            >
+                                <option value="Standard Product">Standard Product</option>
+                                <option value="New Arrival">New Arrival</option>
+                                <option value="Best Seller">Best Seller</option>
+                                <option value="Featured Pick">Featured Pick</option>
+                            </select>
                         </div>
+                    </div>
 
-                        <div className={styles.previewBox}>
-                            <h3>After submit</h3>
-                            <div className={styles.previewItems}>
-                                <span>Can edit later</span>
-                                <span>Can add more images</span>
-                                <span>Can update pricing anytime</span>
-                                <span>Safe for testing</span>
+                    <div className={styles.fileUploadCard}>
+                        <div className={styles.fileUploadHeader}>
+                            <div>
+                                <p className={styles.inputLabel}>
+                                    Product Main Image <span className={styles.requiredMark}>*</span>
+                                </p>
+                                <p className={styles.fileUploadInfo}>Add a high-resolution product image for the storefront.</p>
                             </div>
-                            <p>
-                                You are now on the proper final step, not a review-only
-                                screen. Submit from here whenever you want.
-                            </p>
+                            <span className={styles.fileBadge}>Image</span>
                         </div>
-                    </>
-                )}
+                        {imagePreview ? (
+                            <img src={imagePreview} alt="Product preview" className={styles.imagePreview} />
+                        ) : null}
+                        <label htmlFor="product-image" className={styles.fileUploadButton}>
+                            <UploadCloud size={20} />
+                            <span>{productData.image ? productData.image.name : "Click to upload image"}</span>
+                        </label>
+                        <input
+                            id="product-image"
+                            key={fileInputKey}
+                            type="file"
+                            name="image"
+                            accept="image/*"
+                            onChange={handleChange}
+                            className={styles.hiddenFileInput}
+                        />
+                    </div>
+                </div>
 
                 <div className={styles.formActions}>
-                    {currentStep > 1 ? (
-                        <button
-                            type="button"
-                            className={styles.secondaryButton}
-                            onClick={handlePreviousStep}
-                        >
-                            Back
-                        </button>
-                    ) : null}
-
-                    {currentStep < totalSteps ? (
-                        <>
-                            <button
-                                type="button"
-                                className={styles.ghostButton}
-                                onClick={() => goToStep(totalSteps)}
-                            >
-                                Skip to Final Step
-                            </button>
-                            <button
-                                type="button"
-                                className={styles.primaryButton}
-                                onClick={handleNextStep}
-                            >
-                                Next Step
-                                <ArrowRight size={16} />
-                            </button>
-                        </>
-                    ) : (
-                        <button type="submit" className={styles.primaryButton} disabled={isSubmitting}>
-                            <Save size={16} />
-                            {isSubmitting ? "Submitting..." : "Submit Product"}
-                        </button>
-                    )}
-                </div>
+                    <button type="submit" className={styles.primaryButton} disabled={isSubmitting}>
+                        {isSubmitting ? <Loader /> : <Save size={16} />}
+                        {isSubmitting ? "Submitting..." : "Submit Product"}
+                    </button>
                 </div>
             </form>
         </section>

@@ -15,7 +15,7 @@ const superAdminAuthRouter = Router();
  * /superAdmin/auth/login:
  *   post:
  *     summary: Login super admin
- *     tags: [Super Admin Auth]
+ *     tags: ['Super Admin Auth']
  *     requestBody:
  *       required: true
  *       content:
@@ -39,7 +39,7 @@ superAdminAuthRouter.post('/login', loginFunction);
  * /superAdmin/auth/register:
  *   post:
  *     summary: Register super admin
- *     tags: [Super Admin Auth]
+ *     tags: ['Super Admin Auth']
  *     requestBody:
  *       required: true
  *       content:
@@ -63,7 +63,7 @@ superAdminAuthRouter.post('/register', registerFunction);
  * /superAdmin/auth/logout:
  *   post:
  *     summary: Logout super admin
- *     tags: [Super Admin Auth]
+ *     tags: ['Super Admin Auth']
  *     responses:
  *       200:
  *         description: Logout successful

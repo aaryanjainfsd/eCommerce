@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import ProductModel from "../models/ProductModel.js";
+import ProductModel from "../models/Product.model.js";
 
 function sanitizeFolderName(value = "") {
     return value
@@ -23,7 +23,7 @@ async function resolveSku(req) {
     }
 
     const product = await ProductModel.findById(productId);
-    return product?.sku || null;
+    return product?.data?.sku || null;
 }
 
 function buildUploadDir(isMultiple, sku) {

@@ -38,28 +38,28 @@ function First() {
                         <div className={styles.productCard} key={item._id}>
                             <a href={`/product-details/${item._id}`} className={styles.productLink} >
                                 <div className={styles.imageWrapper}>
-                                    <img src={ item.images?.cloud || item.images?.local } alt={item.name} className={styles.productImage} loading="lazy" />
+                                    <img src={ item.data?.images?.cloud || item.data?.images?.local } alt={item.data?.name} className={styles.productImage} loading="lazy" />
                                 </div>
 
                                 <div className={styles.productInfo}>
                                     {/* PRODUCT NAME */}
                                     <h3 className={styles.productTitle}>
-                                        {limitWords(item.name, 4)}
+                                        {limitWords(item.data?.name, 4)}
                                     </h3>
 
                                     {/* CATEGORY */}
                                     <p className={styles.productCategory}>
-                                        {item.category}
+                                        {item.data?.category}
                                     </p>
 
                                     {/* DESCRIPTION */}
                                     <p className={styles.productDesc}>
-                                        {limitWords(item.description, 8)}
+                                        {limitWords(item.data?.shortDescription, 8)}
                                     </p>
 
                                     <div className={styles.productFooter}>
                                         {/* PRICE */}
-                                        <span className={styles.productPrice}> {currency}{" "} {convert( Number(item.discountedPrice) )} </span>
+                                        <span className={styles.productPrice}> {currency}{" "} {convert( Number(item.data?.sellingPrice) )} </span>
                                         <button className={styles.viewBtn}>
                                             View Details
                                         </button>

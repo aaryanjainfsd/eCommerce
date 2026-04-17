@@ -103,10 +103,12 @@ export async function loginFunction(req, res) {
                     maxAge: 7 * 24 * 60 * 60 * 1000
                 });
 
+                const clientIdValue = user.foreignKeys.client_id?._id || user.foreignKeys.client_id;
+
                 return res.status(200).json({
                     message: "Admin login successful",
                     user: {
-                        client_id: user.foreignKeys.client_id
+                        client_id: clientIdValue
                     }
                 });
             }

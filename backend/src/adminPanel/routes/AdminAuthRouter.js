@@ -14,7 +14,7 @@ const adminAuthRouter = Router();
  * /admin/auth/verify-username:
  *   post:
  *     summary: Verify if username exists in the system
- *     tags: [Admin Auth]
+ *     tags: ['Admin Auth']
  *     requestBody:
  *       required: true
  *       content:
@@ -38,7 +38,7 @@ adminAuthRouter.post('/verify-username', verifyUsernameFunction);
  * /admin/auth/login:
  *   post:
  *     summary: Login admin
- *     tags: [Admin Auth]
+ *     tags: ['Admin Auth']
  *     requestBody:
  *       required: true
  *       content:
@@ -62,7 +62,7 @@ adminAuthRouter.post('/login', loginFunction);
  * /admin/auth/register:
  *   post:
  *     summary: Register admin
- *     tags: [Admin Auth]
+ *     tags: ['Admin Auth']
  *     requestBody:
  *       required: true
  *       content:
