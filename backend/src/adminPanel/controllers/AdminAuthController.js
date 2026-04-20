@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import { isValidObjectId } from "mongoose";
 import AdminAuthModel from '../models/AdminAuth.model.js';
 import ClientModel from '../../shared/models/Client.model.js';
+import { normalizeBusinessIdentifier } from '../../shared/utils/normalizeBusinessIdentifier.js';
 
 
 export async function registerFunction(req, res) {
@@ -10,8 +11,9 @@ export async function registerFunction(req, res) {
         console.log("Received registration request with body:", req.body);
         const { username, password, client_id } = req.body;
         const futureSampleId = `sample_${Date.now()}`;
+        const normalizedUsername = normalizeBusinessIdentifier(username);
 
-        if (!username || !password) {
+        if (!normalizedUsername || !password) {
             return res.status(400).json({ message: "Username and password are required" });
         }
 
@@ -28,7 +30,7 @@ export async function registerFunction(req, res) {
             return res.status(404).json({ message: "Client not found for given client_id" });
         }
 
-        const existing = await AdminAuthModel.findOne({ "data.username": username });
+        const existing = await AdminAuthModel.findOne({ "data.username": normalizedUsername });
         if (existing) {
             return res.status(409).json({ message: "Username already registered" });
         } else {
@@ -42,7 +44,7 @@ export async function registerFunction(req, res) {
                     future_sample_id: futureSampleId
                 },
                 data: {
-                    username: username,
+                    username: normalizedUsername,
                     password: hashedPassword
                 }
             });
@@ -65,54 +67,55 @@ export async function registerFunction(req, res) {
 export async function loginFunction(req, res) {
     try {
         const { username, password } = req.body;
-        const user = await AdminAuthModel.findOne({ "data.username": username })
+        const normalizedUsername = normalizeBusinessIdentifier(username);
+        const user = await AdminAuthModel.findOne({ "data.username": normalizedUsername })
         .populate({
             path: "foreignKeys.client_id",
-            select: "clientName businessName websiteURL email phone status category"
+            select: "clientName businessName websiteURL email phone status category createdAt updatedAt"
         });
-        
+
         if (!user) {
             return res.status(404).json({ message: "Invalid username or password" });
         }
-        else {
-            const matched = await bcrypt.compare(password, user.data.password);
-            if (!matched) {
-                return res.status(401).json({ message: "Incorrect password" });
-            }
-            else {
-                // -------------------------
-                // CREATE JWT TOKEN
-                // -------------------------
-                const token = jwt.sign(
-                    {
-                        id: user._id,
-                        username: user.data.username,
-                        role: "admin"
-                    },
-                    process.env.JWT_SECRET,
-                    { expiresIn: '7d' }
-                );
-
-                // -------------------------
-                // STORE TOKEN IN COOKIE
-                // -------------------------
-                res.cookie("AdminLoginToken", token, {
-                    httpOnly: true,
-                    secure: false,
-                    sameSite: "strict",
-                    maxAge: 7 * 24 * 60 * 60 * 1000
-                });
-
-                const clientIdValue = user.foreignKeys.client_id?._id || user.foreignKeys.client_id;
-
-                return res.status(200).json({
-                    message: "Admin login successful",
-                    user: {
-                        client_id: clientIdValue
-                    }
-                });
-            }
+        
+        console.log("Login attempt for username:", user.data.username);
+        const matched = await bcrypt.compare(password, user.data.password);
+        if (!matched) {
+            return res.status(401).json({ message: "Incorrect password" });
         }
+
+        // -------------------------
+        // CREATE JWT TOKEN
+        // -------------------------
+        const token = jwt.sign(
+            {
+                id: user._id,
+                username: user.data.username,
+                role: "admin"
+            },
+            process.env.JWT_SECRET,
+            { expiresIn: '7d' }
+        );
+
+        // -------------------------
+        // STORE TOKEN IN COOKIE
+        // -------------------------
+        res.cookie("AdminLoginToken", token, {
+            httpOnly: true,
+            secure: false,
+            sameSite: "strict",
+            maxAge: 7 * 24 * 60 * 60 * 1000
+        });
+
+        const clientData = user.foreignKeys.client_id || null;
+
+        return res.status(200).json({
+            message: "Admin login successful",
+            user: {
+                username: user.data.username,
+                client_id: clientData
+            }
+        });
     }
     catch (error) {
         console.log("Some error came");
@@ -133,14 +136,15 @@ export async function verifyUsernameFunction(req, res) {
     try {
         // Extract username from request body
         const { username } = req.body;
+        const normalizedUsername = normalizeBusinessIdentifier(username);
 
         // Validate that username is provided
-        if (!username || username.trim() === '') {
+        if (!normalizedUsername) {
             return res.status(400).json({ message: "Username is required" });
         }
 
         // Search for user with matching username in database
-        const user = await AdminAuthModel.findOne({ "data.username": username });
+        const user = await AdminAuthModel.findOne({ "data.username": normalizedUsername });
 
         // If user not found, return 404 error
         if (!user) {

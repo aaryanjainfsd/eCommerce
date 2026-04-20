@@ -1,43 +1,42 @@
 // ==================== REACT & ROUTING ====================
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+    import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
 // ==================== STOREFRONT IMPORTS ====================
-import OutletComponent from "../../storeFront/components/OutletComponent";
-
-import Home from "../../storeFront/pages/Home";
-import Cart from "../../storeFront/pages/Cart";
-import Login from "../../storeFront/pages/Login";
-import AboutUs from "../../storeFront/pages/AboutUs";
-import Checkout from "../../storeFront/pages/Checkout";
-import Register from "../../storeFront/pages/Register";
-import AllProducts from "../../storeFront/pages/AllProducts";
-import ProductDetails from "../../storeFront/pages/ProductDetails";
+    import OutletComponent from "../../storeFront/components/OutletComponent";
+    import Home from "../../storeFront/pages/Home";
+    import Cart from "../../storeFront/pages/Cart";
+    import Login from "../../storeFront/pages/Login";
+    import AboutUs from "../../storeFront/pages/AboutUs";
+    import Checkout from "../../storeFront/pages/Checkout";
+    import Register from "../../storeFront/pages/Register";
+    import AllProducts from "../../storeFront/pages/AllProducts";
+    import ProductDetails from "../../storeFront/pages/ProductDetails";
 
 
 // ==================== ADMIN IMPORTS ====================
-import AdminOutlet from "../../adminPanel/components/AdminOutlet";
-import AdminLogin from "../../adminPanel/pages/AdminLogin";
-import Dashboard from "../../adminPanel/pages/Dashboard";
-import AdminProfile from "../../adminPanel/pages/AdminProfile";
-import Products from "../../adminPanel/pages/Products";
-import AddProduct from "../../adminPanel/pages/AddProduct";
-import AddMorePhotos from "../../adminPanel/pages/AddMorePhotos";
+    import AdminOutlet from "../../adminPanel/components/AdminOutlet";
+    import AdminLogin from "../../adminPanel/pages/AdminLogin";
+    import Dashboard from "../../adminPanel/pages/Dashboard";
+    import AdminProfile from "../../adminPanel/pages/AdminProfile";
+    import Products from "../../adminPanel/pages/Products";
+    import AddProduct from "../../adminPanel/pages/AddProduct";
+    import AddMorePhotos from "../../adminPanel/pages/AddMorePhotos";
+    import EditProduct from "../../adminPanel/pages/EditProduct";
 
 // ==================== SUPER ADMIN IMPORTS ====================
-import SuperAdminPanelOutlet from "../../superAdminPanel/components/SuperAdminPanelOutlet.jsx";
-
-import SuperClients from "../../superAdminPanel/pages/AddClients.jsx";
-import SuperAdminLogin from "../../superAdminPanel/pages/Login.jsx";
+    import SuperAdminPanelOutlet from "../../superAdminPanel/components/SuperAdminPanelOutlet.jsx";
+    import SuperClients from "../../superAdminPanel/pages/AddClients.jsx";
+    import SuperAdminLogin from "../../superAdminPanel/pages/Login.jsx";
 
 
 // ==================== PROTECTED ROUTES ====================
-import UserProtectedRoute from "./protectedRoutes/UserProtectedRoute";
-import AdminProtectedRoute from "./protectedRoutes/AdminProtectedRoute";
-import SuperAdminProtectedRoute from "./protectedRoutes/SuperAdminProtectedRoute";
+    import UserProtectedRoute from "./protectedRoutes/UserProtectedRoute";
+    import AdminProtectedRoute from "./protectedRoutes/AdminProtectedRoute";
+    import SuperAdminProtectedRoute from "./protectedRoutes/SuperAdminProtectedRoute";  
 
 // ==================== CONTEXT PROVIDERS ====================
-import FirebaseProvider from "../../storeFront/contexts/FirebaseProvider";
-import CurrencyProvider from "../../storeFront/contexts/CurrencyProvider";
+    import FirebaseProvider from "../../storeFront/contexts/FirebaseProvider";
+    import CurrencyProvider from "../../storeFront/contexts/CurrencyProvider";
 
 
 const storeFrontChildren = [ 
@@ -56,8 +55,9 @@ const adminChildren = [
     { path: "dashboard", element: ( <AdminProtectedRoute> <Dashboard /> </AdminProtectedRoute>),},
     { path: "profile", element: ( <AdminProtectedRoute> <AdminProfile /> </AdminProtectedRoute>),},
     { path: "products", element: ( <AdminProtectedRoute> <Products /> </AdminProtectedRoute>),},
-    { path: "products/add", element: ( <AdminProtectedRoute> <AddProduct /> </AdminProtectedRoute>),},
-    { path: "products/:productId/photos", element: ( <AdminProtectedRoute> <AddMorePhotos /> </AdminProtectedRoute>),},
+    { path: "product/add", element: ( <AdminProtectedRoute> <AddProduct /> </AdminProtectedRoute>),},
+    { path: "product/addPhotos/:productId", element: ( <AdminProtectedRoute> <AddMorePhotos /> </AdminProtectedRoute>),},
+    { path: "product/edit/:productId", element: ( <AdminProtectedRoute> <EditProduct /> </AdminProtectedRoute>),},
 ];
 
 const superAdminPanelChildren = [

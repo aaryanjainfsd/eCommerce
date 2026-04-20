@@ -28,9 +28,16 @@ const categoryLabelMap = {
 
 const EMAIL_REGEX = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
 const URL_REGEX =
-    /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)$/;
+    /^https?:\/\/(?:www\.)?(?:localhost|(?:[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,63}))(?::\d{1,5})?(?:[-a-zA-Z0-9()@:%_+.~#?&/=]*)?$/;
 const VALID_STATUSES = ["Active", "Onboarding", "Inactive"];
 const VALID_CATEGORIES = ["starter", "premium", "luxury"];
+
+function normalizeBusinessIdentifier(value = "") {
+    return String(value)
+        .trim()
+        .toLowerCase()
+    .replace(/[^a-z0-9_]/g, "_");
+}
 
 function validateForm(data) {
     const errors = {};
@@ -49,6 +56,9 @@ function validateForm(data) {
         errors.businessName = "Business name is required.";
     } else if (data.businessName.trim().length < 2) {
         errors.businessName = "Must be at least 2 characters.";
+    } else if (!/[a-z0-9]/.test(data.businessName)) {
+        errors.businessName =
+            "Business name must contain at least one letter or number.";
     }
 
     if (!data.websiteURL.trim()) {
@@ -196,7 +206,7 @@ function SuperClients() {
             };
 
             if (fieldName === "businessName") {
-                updatedValue.username = fieldValue;
+                updatedValue.username = normalizeBusinessIdentifier(fieldValue);
             }
 
             if (fieldName === "phone") {
@@ -235,7 +245,10 @@ function SuperClients() {
         if (Object.keys(validationErrors).length > 0) return;
 
         try {
-            const autoUsername = formData.businessName;
+            const normalizedBusinessName = normalizeBusinessIdentifier(
+                formData.businessName,
+            );
+            const autoUsername = normalizedBusinessName;
             const autoPassword = formData.phone;
             const clientPayload = {
                 clientName: formData.clientName,

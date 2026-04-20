@@ -233,6 +233,20 @@
     flex-wrap: wrap;
 }
 
+.editButton {
+    border: 1px solid #d6e3ed;
+    background: #fff;
+    color: #37607a;
+    width: 1.95rem;
+    height: 1.95rem;
+    border-radius: 0.48rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
 .actionGroup button {
     border: 1px solid #d6e3ed;
     background: #fff;

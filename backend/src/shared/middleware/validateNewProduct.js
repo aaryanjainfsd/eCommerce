@@ -22,6 +22,10 @@ export default async function validateNewProduct(req, res, next) {
             return res.status(400).json({ message: "Product SKU is required." });
         }
 
+        if (!req.body.client_id) {
+            return res.status(400).json({ message: "client_id is required." });
+        }
+
         if (!req.file) {
             return res.status(400).json({ message: "Product image is required." });
         }
@@ -30,17 +34,23 @@ export default async function validateNewProduct(req, res, next) {
         req.body.slug = slug;
         req.body.sku = sku.trim();
 
-        const existingSlug = await ProductModel.findOne({ "data.slug": slug });
+        const existingSlug = await ProductModel.findOne({
+            "foreignKeys.client_id": req.body.client_id,
+            "data.slug": slug
+        });
         if (existingSlug) {
             return res.status(409).json({
-                message: "Slug already exists. Please use a different product name."
+                message: "Slug already exists for this client. Please choose a different product name."
             });
         }
 
-        const existingSku = await ProductModel.findOne({ "data.sku": req.body.sku });
+        const existingSku = await ProductModel.findOne({
+            "foreignKeys.client_id": req.body.client_id,
+            "data.sku": req.body.sku
+        });
         if (existingSku) {
             return res.status(409).json({
-                message: "SKU already exists. Please use a different product SKU."
+                message: "SKU already exists for this client. Please choose a different SKU."
             });
         }
 

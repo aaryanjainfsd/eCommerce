@@ -1,6 +1,15 @@
 import streamifier from "streamifier";
+import { isValidObjectId } from "mongoose";
 import cloudinary from "../../shared/config/cloudinary.js";
 import ProductModel from "../models/Product.model.js";
+
+function buildProductIdentifierQuery(identifier) {
+    if (isValidObjectId(identifier)) {
+        return { _id: identifier };
+    }
+
+    return { "data.productCode": identifier };
+}
 
 function sanitizeFolderName(value = "") {
     return value
@@ -12,23 +21,51 @@ function sanitizeFolderName(value = "") {
         .toLowerCase();
 }
 
-async function resolveSku(req) {
-    if (req.body?.sku?.trim()) {
-        return req.body.sku.trim();
+function createProductCode() {
+    return `PRD-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
+}
+
+async function resolveProductCode(req) {
+    if (req.body?.productCode?.trim()) {
+        return req.body.productCode.trim();
     }
 
     const productId = req.params?.productId || req.params?.id;
     if (!productId) {
+        if (req.body?.productCode?.trim()) {
+            return req.body.productCode.trim();
+        }
+
+        console.log("resolveProductCode: No productId in params, generating productCode for new upload");
+        const generatedCode = createProductCode();
+        req.body = req.body || {};
+        req.body.productCode = generatedCode;
+        return generatedCode;
+    }
+
+    console.log("resolveProductCode: Looking for product with identifier:", productId);
+    const product = await ProductModel.findOne(buildProductIdentifierQuery(productId));
+    console.log("resolveProductCode: Found product:", product ? { id: product._id, productCode: product.data?.productCode } : null);
+
+    if (!product) {
+        console.log("resolveProductCode: Product not found");
         return null;
     }
 
-    const product = await ProductModel.findById(productId);
-    return product?.data?.sku || null;
+    if (!product.data.productCode) {
+        console.log("resolveProductCode: Product missing productCode, generating one");
+        const generatedCode = createProductCode();
+        await ProductModel.findByIdAndUpdate(product._id, { "data.productCode": generatedCode });
+        console.log("resolveProductCode: Generated and saved productCode:", generatedCode);
+        return generatedCode;
+    }
+
+    return product.data.productCode;
 }
 
-function buildCloudFolder(isMultiple, sku) {
+function buildCloudFolder(isMultiple, productCode) {
     const rootFolder = isMultiple ? "productMultipleImages" : "mainProductImage";
-    const folderName = sku ? sanitizeFolderName(sku) : "default";
+    const folderName = productCode ? sanitizeFolderName(productCode) : "default";
     return `${rootFolder}/${folderName}`;
 }
 
@@ -39,8 +76,8 @@ export async function mainImgUploadCloudMw(req, res, next) {
             return next();
         }
 
-        const sku = await resolveSku(req);
-        const folder = buildCloudFolder(false, sku);
+        const productCode = await resolveProductCode(req);
+        const folder = buildCloudFolder(false, productCode);
 
         const uploadResult = await new Promise((resolve, reject) => {
             const cloudinaryStream = cloudinary.uploader.upload_stream(
@@ -77,8 +114,8 @@ export async function multipleImgsUploadCloudMw(req, res, next)
             return next();
         }
 
-        const sku = await resolveSku(req);
-        const folder = buildCloudFolder(true, sku);
+        const productCode = await resolveProductCode(req);
+        const folder = buildCloudFolder(true, productCode);
 
         const uploadResults = await Promise.all(
             req.files.map((file) => {

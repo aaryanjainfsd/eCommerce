@@ -1,6 +1,15 @@
 import fs from "fs";
 import path from "path";
+import { isValidObjectId } from "mongoose";
 import ProductModel from "../models/Product.model.js";
+
+function buildProductIdentifierQuery(identifier) {
+    if (isValidObjectId(identifier)) {
+        return { _id: identifier };
+    }
+
+    return { "data.productCode": identifier };
+}
 
 function sanitizeFolderName(value = "") {
     return value
@@ -12,24 +21,52 @@ function sanitizeFolderName(value = "") {
         .toLowerCase();
 }
 
-async function resolveSku(req) {
-    if (req.body?.sku?.trim()) {
-        return req.body.sku.trim();
+function createProductCode() {
+    return `PRD-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
+}
+
+async function resolveProductCode(req) {
+    if (req.body?.productCode?.trim()) {
+        return req.body.productCode.trim();
     }
 
     const productId = req.params?.productId || req.params?.id;
     if (!productId) {
+        if (req.body?.productCode?.trim()) {
+            return req.body.productCode.trim();
+        }
+
+        console.log("resolveProductCode: No productId in params, generating productCode for new upload");
+        const generatedCode = createProductCode();
+        req.body = req.body || {};
+        req.body.productCode = generatedCode;
+        return generatedCode;
+    }
+
+    console.log("resolveProductCode: Looking for product with identifier:", productId);
+    const product = await ProductModel.findOne(buildProductIdentifierQuery(productId));
+    console.log("resolveProductCode: Found product:", product ? { id: product._id, productCode: product.data?.productCode } : null);
+
+    if (!product) {
+        console.log("resolveProductCode: Product not found");
         return null;
     }
 
-    const product = await ProductModel.findById(productId);
-    return product?.data?.sku || null;
+    if (!product.data.productCode) {
+        console.log("resolveProductCode: Product missing productCode, generating one");
+        const generatedCode = createProductCode();
+        await ProductModel.findByIdAndUpdate(product._id, { "data.productCode": generatedCode });
+        console.log("resolveProductCode: Generated and saved productCode:", generatedCode);
+        return generatedCode;
+    }
+
+    return product.data.productCode;
 }
 
-function buildUploadDir(isMultiple, sku) {
+function buildUploadDir(isMultiple, productCode) {
     const rootFolder = isMultiple ? "productMultipleImages" : "mainProductImage";
-    const skuFolder = sku ? sanitizeFolderName(sku) : "default";
-    return path.join(process.cwd(), "src", "shared", "uploads", rootFolder, skuFolder);
+    const folderName = productCode ? sanitizeFolderName(productCode) : "default";
+    return path.join(process.cwd(), "src", "shared", "uploads", rootFolder, folderName);
 }
 
 export async function mainImgUploadLocalMw(req, res, next) {
@@ -39,8 +76,8 @@ export async function mainImgUploadLocalMw(req, res, next) {
             return next();
         }
 
-        const sku = await resolveSku(req);
-        const uploadDir = buildUploadDir(false, sku);
+        const productCode = await resolveProductCode(req);
+        const uploadDir = buildUploadDir(false, productCode);
 
         if (!fs.existsSync(uploadDir)) {
             fs.mkdirSync(uploadDir, { recursive: true });
@@ -53,7 +90,7 @@ export async function mainImgUploadLocalMw(req, res, next) {
         fs.writeFileSync(filePath, req.file.buffer);
 
         req.localImage = {
-            url: `/uploads/main product images/${sku ? sanitizeFolderName(sku) : "default"}/${fileName}`,
+            url: `/uploads/mainProductImage/${productCode ? sanitizeFolderName(productCode) : "default"}/${fileName}`,
             path: filePath
         };
 
@@ -71,8 +108,8 @@ export async function multipleImgsUploadLocalMw(req, res, next) {
             return next();
         }
 
-        const sku = await resolveSku(req);
-        const uploadDir = buildUploadDir(true, sku);
+        const productCode = await resolveProductCode(req);
+        const uploadDir = buildUploadDir(true, productCode);
 
         if (!fs.existsSync(uploadDir)) {
             fs.mkdirSync(uploadDir, { recursive: true });
@@ -86,7 +123,7 @@ export async function multipleImgsUploadLocalMw(req, res, next) {
             fs.writeFileSync(filePath, file.buffer);
 
             return {
-                url: `/uploads/multiple product images/${sku ? sanitizeFolderName(sku) : "default"}/${fileName}`,
+                url: `/uploads/productMultipleImages/${productCode ? sanitizeFolderName(productCode) : "default"}/${fileName}`,
                 path: filePath
             };
         });

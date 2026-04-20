@@ -1,4 +1,5 @@
 import {Schema, model } from "mongoose";
+import { normalizeBusinessIdentifier } from "../../shared/utils/normalizeBusinessIdentifier.js";
 
 const adminAuthSchema = new Schema(
     {
@@ -12,7 +13,12 @@ const adminAuthSchema = new Schema(
             future_sample_id: { type: String, required: true, trim: true }
         },
         data: {
-            username: { type: String, required: true, unique: true },
+            username: {
+                type: String,
+                required: true,
+                unique: true,
+                set: normalizeBusinessIdentifier,
+            },
             password: { type: String, required: true },
         }
     },

@@ -2,23 +2,57 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Plus, Search, Filter, Eye, Pencil, Trash2, Images  } from "lucide-react";
 import styles from "../assets/css/products.module.css";
-import { fetchProductsAPI } from "../apis/services/product.service";
+import { fetchProductsAPI, deleteProductAPI } from "../apis/services/product.service";
+import useAdminAuthStore from "../stores/adminAuthStore";
+
+function getProductImageSources(product) {
+    return [product.data?.images?.cloud, product.data?.images?.local].filter(
+        (source, index, sources) => Boolean(source) && sources.indexOf(source) === index
+    );
+}
 
 function Products() {
+    const { user } = useAdminAuthStore();
     const [products, setProducts] = useState([]);
     const [popUpOpen, setPopupOpen] = useState(false);
+    const [imageSourceOverrides, setImageSourceOverrides] = useState({});
+    const clientIdValue =
+        typeof user?.client_id === "string"
+            ? user.client_id
+            : user?.client_id?._id;
 
     useEffect(() => {
+        if (!clientIdValue) {
+            setProducts([]);
+            return;
+        }
+
         fetchProducts();
-    }, []);
+    }, [clientIdValue]);
 
     async function fetchProducts() {
         try {
-            const productList = await fetchProductsAPI();
+            const productList = await fetchProductsAPI(clientIdValue);
             setProducts(productList || []);
+            setImageSourceOverrides({});
         } catch (error) {
             console.error("Error fetching products:", error);
         }
+    }
+
+    function handleProductImageError(productIdentifier, imageSources) {
+        setImageSourceOverrides((prev) => {
+            const currentSource = Object.prototype.hasOwnProperty.call(prev, productIdentifier)
+                ? prev[productIdentifier]
+                : imageSources[0];
+            const currentIndex = imageSources.indexOf(currentSource);
+            const nextSource = currentIndex >= 0 ? imageSources[currentIndex + 1] : imageSources[1];
+
+            return {
+                ...prev,
+                [productIdentifier]: nextSource || null,
+            };
+        });
     }
 
 
@@ -26,6 +60,8 @@ function Products() {
     {
         try 
         {
+            await deleteProductAPI(productId);
+            await fetchProducts();
         }
         catch(error)
         {
@@ -61,7 +97,7 @@ function Products() {
                 </div>
 
                 <Link
-                    to="/adminPanel/products/add"
+                    to="/adminPanel/product/add"
                     className={styles.primaryButton}
                 >
                     <Plus size={18} />
@@ -135,13 +171,16 @@ function Products() {
                             ) : (
                                 products.map((product) => {
                                     const productId = product._id || product.id;
-                                    const productImage =
-                                        product.data?.images?.cloud || product.data?.images?.local;
+                                    const productIdentifier = product.data?.productCode || productId;
+                                    const productImageSources = getProductImageSources(product);
+                                    const productImage = Object.prototype.hasOwnProperty.call(imageSourceOverrides, productIdentifier)
+                                        ? imageSourceOverrides[productIdentifier]
+                                        : productImageSources[0];
                                     const stockStatus =
                                         product.data?.stockStatus || "Out of Stock";
 
                                     return (
-                                        <tr key={productId}>
+                                        <tr key={productIdentifier}>
                                             <td>
                                                 <div className={styles.productCell}>
                                                     <div className={styles.productThumb}>
@@ -149,6 +188,7 @@ function Products() {
                                                             <img
                                                                 src={productImage}
                                                                 alt={product.data?.name}
+                                                                onError={() => handleProductImageError(productIdentifier, productImageSources)}
                                                                 style={{ width: "100%", height: "100%", objectFit: "cover" }}
                                                             />
                                                         ) : (
@@ -160,7 +200,7 @@ function Products() {
                                                             {product.data?.name || "Unnamed Product"}
                                                         </p>
                                                         <span className={styles.productId}>
-                                                            {productId}
+                                                            {productIdentifier}
                                                         </span>
                                                     </div>
                                                 </div>
@@ -185,20 +225,21 @@ function Products() {
                                             <td>
                                                 <div className={styles.actionGroup}>
                                                     <Link
-                                                        to={`/adminPanel/products/${productId}/photos`}
+                                                        to={`/adminPanel/product/addPhotos/${productIdentifier}`}
                                                         state={{ product }}
                                                         className={styles.photosButton}
                                                     >
                                                         <Images size={16} />
                                                         Add More Photos
                                                     </Link>
-                                                    <button type="button" aria-label="View product" >
+                                                    <button type="button" aria-label="View on StoreFront" >
                                                         <Eye size={16} />
                                                     </button>
-                                                    <button type="button" aria-label="Edit product" >
+
+                                                    <Link type="button" to={`/adminPanel/products/edit/${productIdentifier}`} state={{ product }} className={styles.editButton}>
                                                         <Pencil size={16} />
-                                                    </button>
-                                                    <button type="button" onClick={() => deleteProductPermanently(productId)} aria-label="Delete product" >
+                                                    </Link>
+                                                    <button type="button" onClick={() => deleteProductPermanently(productIdentifier)} aria-label="Delete product" >
                                                         <Trash2 size={16} />
                                                     </button>
                                                 </div>

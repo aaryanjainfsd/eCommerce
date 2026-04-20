@@ -1,9 +1,38 @@
+import { Types, isValidObjectId } from "mongoose";
 import ProductMultipleImagesModel from "../models/ProductImages.model.js";
 import ProductModel from '../models/Product.model.js';
 
+function buildProductIdentifierQuery(identifier) {
+    if (isValidObjectId(identifier)) {
+        return { _id: identifier };
+    }
+
+    return { "data.productCode": identifier };
+}
+
+function createProductCode() {
+    return `PRD-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
+}
+
 export async function getProducts(req, res) {
     try {
+        const { client_id } = req.query;
+        const matchStage = {};
+
+        if (client_id) {
+            if (!isValidObjectId(client_id)) {
+                return res.status(400).json({
+                    message: "Invalid client_id"
+                });
+            }
+
+            matchStage["foreignKeys.client_id"] = new Types.ObjectId(client_id);
+        }
+
         const products = await ProductModel.aggregate([
+            ...(Object.keys(matchStage).length > 0
+                ? [{ $match: matchStage }]
+                : []),
             {
                 $lookup: {
                     from: "client_product_images",
@@ -81,6 +110,7 @@ export async function addProduct(req, res) {
                 sellingPrice: Number(rest.sellingPrice) || 0,
                 stockQuantity: Number(rest.stockQuantity) || 0,
                 sku: rest.sku,
+                productCode: rest.productCode?.trim() || createProductCode(),
                 stockStatus: rest.stockStatus || "In Stock",
                 shortDescription: rest.shortDescription || "",
                 brand: rest.brand || "",
@@ -112,7 +142,43 @@ export async function addProduct(req, res) {
 export async function updateProduct(req, res) {
     try {
         const { id } = req.params;
-        const { client_id, ...rest } = req.body;
+        const { ...rest } = req.body;
+        const query = buildProductIdentifierQuery(id);
+
+        const existingProduct = await ProductModel.findOne(query);
+        if (!existingProduct) {
+            return res.status(404).json({
+                message: "Product not found"
+            });
+        }
+
+        if (rest.slug) {
+            const slugConflict = await ProductModel.findOne({
+                _id: { $ne: existingProduct._id },
+                "foreignKeys.client_id": existingProduct.foreignKeys.client_id,
+                "data.slug": rest.slug.trim()
+            });
+
+            if (slugConflict) {
+                return res.status(409).json({
+                    message: "Slug already exists for this client. Please choose a different slug."
+                });
+            }
+        }
+
+        if (rest.sku) {
+            const skuConflict = await ProductModel.findOne({
+                _id: { $ne: existingProduct._id },
+                "foreignKeys.client_id": existingProduct.foreignKeys.client_id,
+                "data.sku": rest.sku.trim()
+            });
+
+            if (skuConflict) {
+                return res.status(409).json({
+                    message: "SKU already exists for this client. Please choose a different SKU."
+                });
+            }
+        }
 
         const updateFields = {};
 
@@ -129,21 +195,11 @@ export async function updateProduct(req, res) {
             updateFields["data.images.cloud"] = req.uploadedImage.url;
         }
 
-        if (client_id) {
-            updateFields["foreignKeys.client_id"] = client_id;
-        }
-
-        const updatedProduct = await ProductModel.findByIdAndUpdate(
-            id,
+        const updatedProduct = await ProductModel.findOneAndUpdate(
+            query,
             { $set: updateFields },
             { new: true }
         );
-
-        if (!updatedProduct) {
-            return res.status(404).json({
-                message: "Product not found"
-            });
-        }
 
         res.status(200).json({
             message: "Product updated successfully",
@@ -161,8 +217,9 @@ export async function updateProduct(req, res) {
 export async function deleteProduct(req, res) {
     try {
         const { id } = req.params;
+        const query = buildProductIdentifierQuery(id);
 
-        const deletedProduct = await ProductModel.findByIdAndDelete(id);
+        const deletedProduct = await ProductModel.findOneAndDelete(query);
 
         if (!deletedProduct) {
             return res.status(404).json({
@@ -187,7 +244,8 @@ export async function getSingleProduct(req, res) {
 	try {
         console.log("Fetching product with ID:", req.params.id);
 		const { id } = req.params;
-		const product = await ProductModel.findById(id);
+        const query = buildProductIdentifierQuery(id);
+		const product = await ProductModel.findOne(query);
 
 		if (!product) {
 			return res.status(404).json({
@@ -218,7 +276,7 @@ export async function addMultipleProductImages(req, res)
             });
         }
 
-        const product = await ProductModel.findById(productId);
+        const product = await ProductModel.findOne(buildProductIdentifierQuery(productId));
         if (!product) {
             return res.status(404).json({
                 message: "Product not found"
@@ -228,12 +286,12 @@ export async function addMultipleProductImages(req, res)
         const localImageUrls = Array.isArray(req.localImages) ? req.localImages.map(img => img.url) : [];
         const cloudImageUrls = Array.isArray(req.uploadedImages) ? req.uploadedImages.map(img => img.url) : [];
         
-        let productImages = await ProductMultipleImagesModel.findOne({"foreignKeys.product_id": productId});
+        let productImages = await ProductMultipleImagesModel.findOne({"foreignKeys.product_id": product._id});
 
         if (!productImages) {
             productImages = new ProductMultipleImagesModel({
                 foreignKeys: {
-                    product_id: productId
+                    product_id: product._id
                 },
                 images: {
                     local: localImageUrls,

@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import "../assets/css/header.css";
 import { useAuth } from "../contexts/AuthProvider";
-import { useCart } from "../contexts/CartProvider";
 import { useFirebase } from "../contexts/FirebaseProvider";
 import { useCurrency } from "../contexts/CurrencyProvider";
 import { NavLink, useNavigate } from "react-router-dom";
 import { Heart, ShoppingBag, User, Menu, X } from "lucide-react";
+import useCartStore from "../stores/cartStore";
 
 import { getDatabase, ref, set } from "firebase/database";
 import { app } from "../firebase.js";
@@ -21,7 +21,7 @@ export default function Header() {
         });
     };
 
-    const { cart } = useCart();
+    const cart = useCartStore((state) => state.cart);
     const navigate = useNavigate();
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [menuOpen, setMenuOpen] = useState(false);
